@@ -143,7 +143,7 @@ export function PortfolioGrid({ images }: PortfolioGridProps) {
         {filtered.map((img, index) => (
           <div
             key={img.src}
-            className="break-inside-avoid relative group cursor-pointer rounded-xl overflow-hidden"
+            className="break-inside-avoid relative group cursor-pointer rounded-xl overflow-hidden bg-brand-light-purple"
             onClick={() => openLightbox(index)}
           >
             <Image
@@ -151,6 +151,7 @@ export function PortfolioGrid({ images }: PortfolioGridProps) {
               alt={img.alt}
               width={400}
               height={600}
+              loading={index < 8 ? "eager" : "lazy"}
               className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />

@@ -324,7 +324,7 @@ export default function HomePage() {
               Book a Consult
             </Link>
             <a
-              href={`https://wa.me/27000000000?text=${encodeURIComponent("Hi Portia! I found you on your website and I'd like to find out more about your services.")}`}
+              href={`https://wa.me/27787513728?text=${encodeURIComponent("Hi Portia! I found you on your website and I'd like to find out more about your services.")}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-full border border-white/30 hover:bg-white/20 transition-all text-base"

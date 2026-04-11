@@ -48,7 +48,7 @@ export default function BookingCancelPage() {
                 <ArrowRight size={16} />
               </Link>
               <a
-                href={`https://wa.me/27000000000?text=${encodeURIComponent("Hi Portia! I tried to book a consultation on your website but had trouble with the payment. Can you help?")}`}
+                href={`https://wa.me/27787513728?text=${encodeURIComponent("Hi Portia! I tried to book a consultation on your website but had trouble with the payment. Can you help?")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-full hover:border-brand-purple hover:text-brand-purple transition-all text-sm"

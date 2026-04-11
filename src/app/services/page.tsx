@@ -9,7 +9,9 @@ import {
   Scissors,
   ArrowRight,
   HelpCircle,
+  type LucideIcon,
 } from "lucide-react";
+import { createServerClient } from "@/lib/supabase";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -17,106 +19,48 @@ export const metadata: Metadata = {
     "Explore all Maphoshy Lifestyle services: personal styling, wardrobe curation, personal shopping, corporate styling, event styling, and custom design.",
 };
 
-const services = [
-  {
-    id: "consultation",
-    icon: Sparkles,
-    title: "Personal Style Consultation",
-    description:
-      "Your style journey starts here. In this deep-dive session, Portia gets to know you — your lifestyle, personality, body shape, colour palette and goals. Together you'll define your signature style and build a clear roadmap to achieve it.",
-    includes: [
-      "60–90 minute style assessment",
-      "Body shape and colour analysis",
-      "Lifestyle and wardrobe audit",
-      "Personalised style brief",
-      "Shopping list and brand recommendations",
-    ],
-    priceFrom: "R 500",
-    booking: "consultation",
-  },
-  {
-    id: "wardrobe",
-    icon: Shirt,
-    title: "Wardrobe Curation & Editing",
-    description:
-      "A cluttered wardrobe leads to decision fatigue and wasted money. Portia visits your space (or works with you virtually), edits what no longer serves you, organises what stays, and identifies the exact pieces that will complete your wardrobe.",
-    includes: [
-      "Full wardrobe audit",
-      "Category-by-category edit",
-      "Styling and outfit mapping",
-      "Gap analysis shopping list",
-      "Storage and organisation tips",
-    ],
-    priceFrom: "R 800",
-    booking: "wardrobe",
-  },
-  {
-    id: "shopping",
-    icon: ShoppingBag,
-    title: "Personal Shopping Services",
-    description:
-      "Skip the overwhelm. Portia does the research, visits the stores, and presents you with curated options that fit your style, body and budget — saving you hours and money.",
-    includes: [
-      "Pre-shopping style brief",
-      "In-store or online sourcing",
-      "Budget-aligned selections",
-      "Try-on session and fit review",
-      "Final look approval and care guidance",
-    ],
-    priceFrom: "R 600",
-    booking: "shopping",
-  },
-  {
-    id: "corporate",
-    icon: Briefcase,
-    title: "Professional & Corporate Styling",
-    description:
-      "Your appearance is part of your personal brand. Portia works with professionals and executives to build a wardrobe that reflects their position, communicates confidence and aligns with their industry.",
-    includes: [
-      "Industry and role analysis",
-      "Dress code interpretation",
-      "Power wardrobe building",
-      "Grooming and accessory guidance",
-      "Presentation and interview dressing",
-    ],
-    priceFrom: "R 700",
-    booking: "corporate",
-  },
-  {
-    id: "event",
-    icon: Star,
-    title: "Event & Special Occasion Styling",
-    description:
-      "Every milestone deserves an unforgettable look. Whether it's a wedding, graduation, gala, birthday shoot or media appearance — Portia will make sure you look and feel extraordinary.",
-    includes: [
-      "Event brief and theme consultation",
-      "Outfit sourcing or custom design",
-      "Accessories and hair & makeup direction",
-      "Final outfit approval",
-      "On-the-day styling (optional)",
-    ],
-    priceFrom: "R 650",
-    booking: "event",
-  },
-  {
-    id: "custom_garment",
-    icon: Scissors,
-    title: "Custom Design & In-House Alterations",
-    description:
-      "When off-the-rack just won't do. Portia designs and produces bespoke garments from scratch — tailored precisely to your measurements, fabric preferences and occasion. She also offers expert alterations on existing pieces.",
-    includes: [
-      "Design consultation and brief",
-      "Fabric and trim selection",
-      "Full body measurements",
-      "Multiple fitting sessions",
-      "Finished garment with care instructions",
-    ],
-    priceFrom: "R 400",
-    booking: "custom_garment",
-  },
+const ICON_MAP: Record<string, LucideIcon> = {
+  Sparkles, Shirt, ShoppingBag, Briefcase, Star, Scissors,
+};
+
+interface ServiceRow {
+  id: string;
+  service_key: string;
+  title: string;
+  description: string;
+  includes: string[];
+  price_from: string;
+  booking_key: string;
+  icon_name: string;
+}
+
+// Hardcoded fallback — used when DB is empty or unavailable
+const FALLBACK_SERVICES: ServiceRow[] = [
+  { id: "1", service_key: "consultation", icon_name: "Sparkles", title: "Personal Style Consultation", description: "Your style journey starts here. In this deep-dive session, Portia gets to know you — your lifestyle, personality, body shape, colour palette and goals. Together you'll define your signature style and build a clear roadmap to achieve it.", includes: ["60–90 minute style assessment", "Body shape and colour analysis", "Lifestyle and wardrobe audit", "Personalised style brief", "Shopping list and brand recommendations"], price_from: "R 500", booking_key: "consultation" },
+  { id: "2", service_key: "wardrobe", icon_name: "Shirt", title: "Wardrobe Curation & Editing", description: "A cluttered wardrobe leads to decision fatigue and wasted money. Portia visits your space (or works with you virtually), edits what no longer serves you, organises what stays, and identifies the exact pieces that will complete your wardrobe.", includes: ["Full wardrobe audit", "Category-by-category edit", "Styling and outfit mapping", "Gap analysis shopping list", "Storage and organisation tips"], price_from: "R 800", booking_key: "wardrobe" },
+  { id: "3", service_key: "shopping", icon_name: "ShoppingBag", title: "Personal Shopping Services", description: "Skip the overwhelm. Portia does the research, visits the stores, and presents you with curated options that fit your style, body and budget — saving you hours and money.", includes: ["Pre-shopping style brief", "In-store or online sourcing", "Budget-aligned selections", "Try-on session and fit review", "Final look approval and care guidance"], price_from: "R 600", booking_key: "shopping" },
+  { id: "4", service_key: "corporate", icon_name: "Briefcase", title: "Professional & Corporate Styling", description: "Your appearance is part of your personal brand. Portia works with professionals and executives to build a wardrobe that reflects their position, communicates confidence and aligns with their industry.", includes: ["Industry and role analysis", "Dress code interpretation", "Power wardrobe building", "Grooming and accessory guidance", "Presentation and interview dressing"], price_from: "R 700", booking_key: "corporate" },
+  { id: "5", service_key: "event", icon_name: "Star", title: "Event & Special Occasion Styling", description: "Every milestone deserves an unforgettable look. Whether it's a wedding, graduation, gala, birthday shoot or media appearance — Portia will make sure you look and feel extraordinary.", includes: ["Event brief and theme consultation", "Outfit sourcing or custom design", "Accessories and hair & makeup direction", "Final outfit approval", "On-the-day styling (optional)"], price_from: "R 650", booking_key: "event" },
+  { id: "6", service_key: "custom_garment", icon_name: "Scissors", title: "Custom Design & In-House Alterations", description: "When off-the-rack just won't do. Portia designs and produces bespoke garments from scratch — tailored precisely to your measurements, fabric preferences and occasion. She also offers expert alterations on existing pieces.", includes: ["Design consultation and brief", "Fabric and trim selection", "Full body measurements", "Multiple fitting sessions", "Finished garment with care instructions"], price_from: "R 400", booking_key: "custom_garment" },
 ];
 
-export default function ServicesPage() {
+async function getServices(): Promise<ServiceRow[]> {
+  try {
+    const db = createServerClient();
+    const { data } = await db
+      .from("service_content")
+      .select("*")
+      .order("service_key");
+    if (data && data.length > 0) return data as ServiceRow[];
+  } catch {
+    // Fall through to hardcoded fallback
+  }
+  return FALLBACK_SERVICES;
+}
+
+export default async function ServicesPage() {
+  const services = await getServices();
+
   return (
     <>
       {/* Header */}
@@ -140,7 +84,7 @@ export default function ServicesPage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-6">
             {services.map((service, index) => {
-              const Icon = service.icon;
+              const Icon = ICON_MAP[service.icon_name] ?? Sparkles;
               return (
                 <div
                   key={service.id}
@@ -165,7 +109,7 @@ export default function ServicesPage() {
                             {service.title}
                           </h2>
                           <span className="text-brand-gold font-semibold text-sm whitespace-nowrap bg-brand-gold/10 px-3 py-1.5 rounded-full">
-                            From {service.priceFrom}
+                            From {service.price_from}
                           </span>
                         </div>
 
@@ -192,7 +136,7 @@ export default function ServicesPage() {
                         </div>
 
                         <Link
-                          href={`/book?service=${service.booking}`}
+                          href={`/book?service=${service.booking_key}`}
                           className="inline-flex items-center gap-2 px-6 py-3 bg-brand-purple text-white font-semibold rounded-full hover:bg-[#4a1470] transition-all shadow-md hover:shadow-lg text-sm"
                         >
                           Book This Service

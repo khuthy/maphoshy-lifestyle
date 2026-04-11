@@ -98,7 +98,7 @@ export default function BookingSuccessPage({ searchParams }: Props) {
                 Back to Home
               </Link>
               <a
-                href={`https://wa.me/27000000000?text=${encodeURIComponent("Hi Portia! I just completed my booking. My reference is " + (reference ?? ""))}`}
+                href={`https://wa.me/27787513728?text=${encodeURIComponent("Hi Portia! I just completed my booking. My reference is " + (reference ?? ""))}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border-2 border-brand-purple text-brand-purple font-semibold rounded-full hover:bg-brand-light-purple transition-all text-sm"

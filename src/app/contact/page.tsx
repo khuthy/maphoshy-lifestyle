@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "Get in touch with Portia Maluleke at Maphoshy Lifestyle via WhatsApp, email, or the contact form.",
 };
 
-const WHATSAPP_NUMBER = "27000000000"; // Replace with actual number
+const WHATSAPP_NUMBER = "27787513728";
 const WHATSAPP_MESSAGE = encodeURIComponent(
   "Hi Portia! I found you on your website and I'd like to find out more about your services."
 );

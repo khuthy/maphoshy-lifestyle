@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { PortfolioGrid } from "@/components/sections/PortfolioGrid";
+import { PortfolioGrid, type PortfolioImage } from "@/components/sections/PortfolioGrid";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { createServerClient } from "@/lib/supabase";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -9,7 +10,25 @@ export const metadata: Metadata = {
     "Browse Portia Maluleke's portfolio of personal styling, custom garments, alterations, corporate and event styling work.",
 };
 
-export default function PortfolioPage() {
+async function getPortfolioImages(): Promise<PortfolioImage[]> {
+  try {
+    const db = createServerClient();
+    const { data } = await db
+      .from("portfolio_items")
+      .select("src, alt, category, label")
+      .eq("active", true)
+      .order("display_order", { ascending: true });
+
+    if (data && data.length > 0) return data as PortfolioImage[];
+  } catch {
+    // Fall through to empty array — PortfolioGrid will use fallback
+  }
+  return [];
+}
+
+export default async function PortfolioPage() {
+  const images = await getPortfolioImages();
+
   return (
     <>
       {/* Page header */}
@@ -31,7 +50,7 @@ export default function PortfolioPage() {
       {/* Grid section */}
       <section className="py-16 bg-brand-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <PortfolioGrid />
+          <PortfolioGrid images={images} />
         </div>
       </section>
 

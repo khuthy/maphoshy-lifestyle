@@ -14,7 +14,7 @@ type FilterCategory =
   | "corporate"
   | "event";
 
-interface PortfolioImage {
+export interface PortfolioImage {
   src: string;
   alt: string;
   category: FilterCategory;
@@ -30,8 +30,8 @@ const FILTER_LABELS: Record<FilterCategory, string> = {
   event: "Events",
 };
 
-// All 47 portfolio images tagged by category
-const portfolioImages: PortfolioImage[] = [
+// Fallback data — used only when the DB is empty or unavailable
+const FALLBACK_IMAGES: PortfolioImage[] = [
   { src: "/assets/image00001.jpeg", alt: "Maphoshy Lifestyle — personal styling", category: "styling", label: "Personal Styling" },
   { src: "/assets/image00002.jpeg", alt: "Maphoshy Lifestyle — styling", category: "styling", label: "Personal Styling" },
   { src: "/assets/image00003.jpeg", alt: "Maphoshy Lifestyle — event styling", category: "event", label: "Event Styling" },
@@ -90,7 +90,13 @@ const FILTERS: FilterCategory[] = [
   "event",
 ];
 
-export function PortfolioGrid() {
+interface PortfolioGridProps {
+  images?: PortfolioImage[];
+}
+
+export function PortfolioGrid({ images }: PortfolioGridProps) {
+  const portfolioImages = images && images.length > 0 ? images : FALLBACK_IMAGES;
+
   const [activeFilter, setActiveFilter] = useState<FilterCategory>("all");
   const [lightboxIndex, setLightboxIndex] = useState(-1);
 

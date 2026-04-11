@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MessageCircle, Mail } from "lucide-react";
 
-const WHATSAPP_NUMBER = "27000000000"; // Replace with Portia's number
+const WHATSAPP_NUMBER = "27787513728"; // Replace with Portia's number
 const WHATSAPP_MESSAGE = encodeURIComponent(
   "Hi Portia! I found you on your website and I'd like to find out more about your services."
 );

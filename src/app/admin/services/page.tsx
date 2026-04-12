@@ -90,7 +90,7 @@ export default function AdminServicesPage() {
   }
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="w-full max-w-full overflow-x-hidden">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Services</h1>
         <p className="text-sm text-gray-500 mt-1">
@@ -100,31 +100,46 @@ export default function AdminServicesPage() {
 
       <div className="space-y-4">
         {services.map((s) => (
-          <div key={s.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden w-full">
-            {/* Card header */}
-            <div className="flex items-start gap-3 p-5 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-brand-light-purple flex items-center justify-center shrink-0 mt-0.5">
-                <Settings size={18} className="text-brand-purple" />
-              </div>
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                  <h2 className="font-semibold text-gray-900 truncate">{s.title}</h2>
-                  <span className="text-xs font-medium text-brand-gold bg-amber-50 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">{s.price_from}</span>
-                  <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-mono whitespace-nowrap shrink-0">{s.service_key}</span>
+          <div key={s.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+            {/* ── Card header ── */}
+            <div className="p-5">
+              <div className="flex items-start gap-3 min-w-0">
+                {/* Icon */}
+                <div className="w-9 h-9 rounded-xl bg-brand-light-purple flex items-center justify-center shrink-0 mt-0.5">
+                  <Settings size={16} className="text-brand-purple" />
                 </div>
-                <p className="text-sm text-gray-500 truncate">{s.description}</p>
+
+                {/* Title + meta — takes all remaining width */}
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-semibold text-gray-900 text-sm leading-snug break-words mb-1">
+                    {s.title}
+                  </h2>
+                  {/* Badges on their own row so they never push the card wider */}
+                  <div className="flex flex-wrap gap-1.5 mb-1.5">
+                    <span className="text-xs font-semibold text-brand-gold bg-amber-50 px-2 py-0.5 rounded-full">
+                      {s.price_from}
+                    </span>
+                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-mono">
+                      {s.service_key}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">{s.description}</p>
+                </div>
+
+                {/* Edit button — sticks to top-right, never causes overflow */}
+                {editId !== s.id && (
+                  <button
+                    onClick={() => openEdit(s)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-600 text-xs font-medium rounded-xl hover:border-brand-purple hover:text-brand-purple transition-colors shrink-0"
+                  >
+                    <Pencil size={12} /> Edit
+                  </button>
+                )}
               </div>
-              {editId !== s.id && (
-                <button
-                  onClick={() => openEdit(s)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-gray-600 text-sm font-medium rounded-xl hover:border-brand-purple hover:text-brand-purple transition-colors shrink-0"
-                >
-                  <Pencil size={13} /> Edit
-                </button>
-              )}
             </div>
 
-            {/* Edit form */}
+            {/* ── Inline edit form ── */}
             {editId === s.id && (
               <div className="border-t border-gray-100 px-5 py-5 bg-gray-50/50 space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -161,7 +176,7 @@ export default function AdminServicesPage() {
                   <label className={labelCls}>What&apos;s included</label>
                   <div className="space-y-2">
                     {(form.includes ?? []).map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
+                      <div key={idx} className="flex items-center gap-2 min-w-0">
                         <div className="w-5 h-5 rounded-full bg-brand-purple/10 flex items-center justify-center shrink-0">
                           <Check size={10} className="text-brand-purple" />
                         </div>
@@ -171,7 +186,10 @@ export default function AdminServicesPage() {
                           className={inputCls}
                           placeholder="Include item…"
                         />
-                        <button onClick={() => removeInclude(idx)} className="text-gray-300 hover:text-red-500 transition-colors shrink-0">
+                        <button
+                          onClick={() => removeInclude(idx)}
+                          className="text-gray-300 hover:text-red-500 transition-colors shrink-0"
+                        >
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -191,7 +209,7 @@ export default function AdminServicesPage() {
                   </div>
                 )}
 
-                <div className="flex gap-3 pt-1">
+                <div className="flex flex-wrap gap-3 pt-1">
                   <button
                     onClick={() => handleSave(s.id)}
                     disabled={saving}

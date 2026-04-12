@@ -80,13 +80,13 @@ interface PortfolioGridProps {
 const LS_KEY = "ml_liked_images";
 
 function buildWhatsAppUrl(img: PortfolioImage): string {
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://maphoshylifestyle.co.za";
-  const imageUrl = `${origin}${img.src}`;
+  const imageUrl = `https://maphoshylifestyle.co.za${img.src}`;
   const message =
     `Hi Portia! I came across a look on the Maphoshy Lifestyle website that I absolutely love and would like to order.\n\n` +
     `*Look:* ${img.label}\n` +
-    `*Category:* ${FILTER_LABELS[img.category] ?? img.label}\n` +
-    `*Image:* ${imageUrl}\n\n` +
+    `*Category:* ${FILTER_LABELS[img.category] ?? img.label}\n\n` +
+    `*Image of the look I love:*\n` +
+    `${imageUrl}\n\n` +
     `Could you please let me know how I can book this look or order a similar piece? I am very interested!`;
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }

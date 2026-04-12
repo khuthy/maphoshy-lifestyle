@@ -3,6 +3,9 @@ import Link from "next/link";
 import { ArrowRight, HelpCircle, TrendingUp, Plus, Minus } from "lucide-react";
 import { createServerClient } from "@/lib/supabase";
 
+// Always render fresh — data is managed via the admin panel
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Pricing",
   description:

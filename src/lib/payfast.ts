@@ -2,7 +2,7 @@ import crypto from "crypto";
 
 const PAYFAST_MERCHANT_ID = process.env.PAYFAST_MERCHANT_ID!;
 const PAYFAST_MERCHANT_KEY = process.env.PAYFAST_MERCHANT_KEY!;
-const PAYFAST_PASSPHRASE = process.env.PAYFAST_PASSPHRASE!;
+const PAYFAST_PASSPHRASE = process.env.PAYFAST_PASSPHRASE ?? "";
 const IS_SANDBOX = process.env.NODE_ENV !== "production";
 
 const PAYFAST_BASE_URL = IS_SANDBOX
@@ -27,22 +27,23 @@ export interface PayFastPaymentData {
 }
 
 /**
- * Generates the MD5 signature for a PayFast payment
+ * Builds the signature string from an ordered data object (no sorting).
+ * PayFast expects params in the same order they appear in the URL.
  */
 export function generatePayFastSignature(
   data: Record<string, string>,
   passphrase: string
 ): string {
-  // Sort keys alphabetically and build query string
-  const paramString = Object.keys(data)
-    .sort()
-    .filter((key) => data[key] !== "" && data[key] !== undefined)
-    .map((key) => `${key}=${encodeURIComponent(data[key]).replace(/%20/g, "+")}`)
+  const paramString = Object.entries(data)
+    .filter(([, v]) => v !== "" && v !== undefined && v !== null)
+    .map(([k, v]) => `${k}=${encodeURIComponent(v).replace(/%20/g, "+")}`)
     .join("&");
 
-  const stringWithPassphrase = `${paramString}&passphrase=${encodeURIComponent(passphrase).replace(/%20/g, "+")}`;
+  const stringToHash = passphrase
+    ? `${paramString}&passphrase=${encodeURIComponent(passphrase).replace(/%20/g, "+")}`
+    : paramString;
 
-  return crypto.createHash("md5").update(stringWithPassphrase).digest("hex");
+  return crypto.createHash("md5").update(stringToHash).digest("hex");
 }
 
 /**
@@ -78,13 +79,13 @@ export function buildPayFastUrl(params: {
   };
 
   const signature = generatePayFastSignature(data, PAYFAST_PASSPHRASE);
-  data.signature = signature;
 
-  const queryString = Object.keys(data)
-    .map((key) => `${key}=${encodeURIComponent(data[key])}`)
+  // Build the final query string in the same order as the signed data, then append signature
+  const queryString = Object.entries(data)
+    .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
     .join("&");
 
-  return `${PAYFAST_BASE_URL}?${queryString}`;
+  return `${PAYFAST_BASE_URL}?${queryString}&signature=${signature}`;
 }
 
 /**

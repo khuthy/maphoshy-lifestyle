@@ -1,24 +1,28 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { Badge } from "@/components/ui/Badge";
-import { LayoutGrid, List, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutGrid, List, ChevronLeft, ChevronRight, Heart, MessageCircle } from "lucide-react";
 
-type FilterCategory = "all" | "styling" | "custom_garment" | "alteration" | "corporate" | "event";
+type ImageCategory = "styling" | "custom_garment" | "alteration" | "corporate" | "event";
+type FilterCategory = "all" | "liked" | ImageCategory;
 type ViewMode = "grid" | "list";
+
+const WHATSAPP_NUMBER = "27787513728";
 
 export interface PortfolioImage {
   src: string;
   alt: string;
-  category: FilterCategory;
+  category: ImageCategory;
   label: string;
 }
 
 const FILTER_LABELS: Record<FilterCategory, string> = {
   all:            "All",
+  liked:          "Liked",
   styling:        "Personal Styling",
   custom_garment: "Custom Garments",
   alteration:     "Alterations",
@@ -34,12 +38,12 @@ const CATEGORY_COLORS: Record<string, string> = {
   event:          "bg-emerald-100 text-emerald-700",
 };
 
-const FILTERS: FilterCategory[] = ["all", "styling", "custom_garment", "alteration", "corporate", "event"];
+const FILTERS: FilterCategory[] = ["all", "liked", "styling", "custom_garment", "alteration", "corporate", "event"];
 const PAGE_SIZE = 12;
 
 const FALLBACK_IMAGES: PortfolioImage[] = Array.from({ length: 47 }, (_, i) => {
   const n = String(i + 1).padStart(5, "0");
-  const cats: Array<[FilterCategory, string]> = [
+  const cats: Array<[ImageCategory, string]> = [
     ["styling", "Personal Styling"], ["styling", "Personal Styling"],
     ["event", "Event Styling"], ["custom_garment", "Custom Garment"],
     ["styling", "Personal Styling"], ["corporate", "Corporate Styling"],
@@ -73,6 +77,17 @@ interface PortfolioGridProps {
   images?: PortfolioImage[];
 }
 
+const LS_KEY = "ml_liked_images";
+
+function buildWhatsAppUrl(img: PortfolioImage): string {
+  const message =
+    `Hi Portia! 👋 I came across a look on the Maphoshy Lifestyle website that I absolutely love and would like to order.\n\n` +
+    `✨ *Look:* ${img.label}\n` +
+    `🏷️ *Category:* ${FILTER_LABELS[img.category] ?? img.label}\n\n` +
+    `Could you please let me know how I can book this look / order a similar piece? I'm very interested! 💜`;
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+
 export function PortfolioGrid({ images }: PortfolioGridProps) {
   const portfolioImages = images && images.length > 0 ? images : FALLBACK_IMAGES;
 
@@ -80,11 +95,31 @@ export function PortfolioGrid({ images }: PortfolioGridProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [page, setPage] = useState(1);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
+  const [likedSrcs, setLikedSrcs] = useState<Set<string>>(new Set());
 
-  const filtered = useMemo(() =>
-    activeFilter === "all" ? portfolioImages : portfolioImages.filter(img => img.category === activeFilter),
-    [portfolioImages, activeFilter]
-  );
+  // Hydrate likes from localStorage once on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(LS_KEY);
+      if (stored) setLikedSrcs(new Set(JSON.parse(stored) as string[]));
+    } catch { /* ignore */ }
+  }, []);
+
+  const toggleLike = useCallback((src: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLikedSrcs(prev => {
+      const next = new Set(prev);
+      if (next.has(src)) next.delete(src); else next.add(src);
+      try { localStorage.setItem(LS_KEY, JSON.stringify(Array.from(next))); } catch { /* ignore */ }
+      return next;
+    });
+  }, []);
+
+  const filtered = useMemo(() => {
+    if (activeFilter === "all") return portfolioImages;
+    if (activeFilter === "liked") return portfolioImages.filter(img => likedSrcs.has(img.src));
+    return portfolioImages.filter(img => img.category === (activeFilter as ImageCategory));
+  }, [portfolioImages, activeFilter, likedSrcs]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -106,24 +141,41 @@ export function PortfolioGrid({ images }: PortfolioGridProps) {
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-10">
         {/* Filter pills */}
         <div className="flex flex-wrap gap-2 flex-1">
-          {FILTERS.map((filter) => (
-            <button
-              key={filter}
-              onClick={() => handleFilter(filter)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                activeFilter === filter
-                  ? "bg-brand-purple text-white shadow-md"
-                  : "bg-white border border-gray-200 text-gray-600 hover:border-brand-purple hover:text-brand-purple"
-              }`}
-            >
-              {FILTER_LABELS[filter]}
-              {filter !== "all" && (
-                <span className={`ml-1.5 text-xs ${activeFilter === filter ? "text-white/70" : "text-gray-400"}`}>
-                  ({portfolioImages.filter(img => img.category === filter).length})
-                </span>
-              )}
-            </button>
-          ))}
+          {FILTERS.map((filter) => {
+            const isLiked = filter === "liked";
+            const count = isLiked
+              ? likedSrcs.size
+              : filter !== "all"
+              ? portfolioImages.filter(img => img.category === (filter as ImageCategory)).length
+              : null;
+            return (
+              <button
+                key={filter}
+                onClick={() => handleFilter(filter)}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  activeFilter === filter
+                    ? isLiked
+                      ? "bg-rose-500 text-white shadow-md"
+                      : "bg-brand-purple text-white shadow-md"
+                    : "bg-white border border-gray-200 text-gray-600 hover:border-brand-purple hover:text-brand-purple"
+                }`}
+              >
+                {isLiked && (
+                  <Heart
+                    size={13}
+                    className={activeFilter === filter ? "fill-white text-white" : "text-rose-400"}
+                    fill={activeFilter === filter ? "currentColor" : "none"}
+                  />
+                )}
+                {FILTER_LABELS[filter]}
+                {count !== null && (
+                  <span className={`text-xs ${activeFilter === filter ? "text-white/70" : "text-gray-400"}`}>
+                    ({count})
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* View toggle */}
@@ -150,65 +202,130 @@ export function PortfolioGrid({ images }: PortfolioGridProps) {
       {/* ── Grid view ── */}
       {viewMode === "grid" && (
         <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3">
-          {paginated.map((img, i) => (
-            <div
-              key={img.src + i}
-              className="break-inside-avoid relative group cursor-pointer rounded-xl overflow-hidden bg-brand-light-purple"
-              onClick={() => openLightbox(globalIndex(i))}
-            >
-              <Image
-                src={img.src}
-                alt={img.alt}
-                width={400}
-                height={600}
-                loading={i < 8 ? "eager" : "lazy"}
-                className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-purple/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
-                <Badge variant="gold" size="sm">{img.label}</Badge>
+          {paginated.map((img, i) => {
+            const liked = likedSrcs.has(img.src);
+            return (
+              <div
+                key={img.src + i}
+                className="break-inside-avoid relative group cursor-pointer rounded-xl overflow-hidden bg-brand-light-purple"
+                onClick={() => openLightbox(globalIndex(i))}
+              >
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  width={400}
+                  height={600}
+                  loading={i < 8 ? "eager" : "lazy"}
+                  className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                />
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-purple/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
+                  <Badge variant="gold" size="sm">{img.label}</Badge>
+                </div>
+                {/* Like button — always visible */}
+                <button
+                  onClick={(e) => toggleLike(img.src, e)}
+                  title={liked ? "Unlike" : "Like this look"}
+                  className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all duration-200 z-10 ${
+                    liked
+                      ? "bg-rose-500 text-white scale-110"
+                      : "bg-white/80 text-gray-400 hover:bg-white hover:text-rose-400 opacity-0 group-hover:opacity-100"
+                  }`}
+                >
+                  <Heart size={14} fill={liked ? "currentColor" : "none"} />
+                </button>
+                {/* WhatsApp button — visible on hover or when liked */}
+                <a
+                  href={buildWhatsAppUrl(img)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  title="Enquire on WhatsApp"
+                  className={`absolute top-2 left-2 w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center shadow-md transition-all duration-200 z-10 ${
+                    liked ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                  }`}
+                >
+                  <MessageCircle size={14} className="text-white" fill="currentColor" />
+                </a>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {/* ── List view ── */}
       {viewMode === "list" && (
         <div className="space-y-3">
-          {paginated.map((img, i) => (
-            <div
-              key={img.src + i}
-              className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-purple/20 transition-all duration-200 flex items-center gap-5 p-4 cursor-pointer"
-              onClick={() => openLightbox(globalIndex(i))}
-            >
-              {/* Thumbnail */}
-              <div className="relative w-20 h-28 rounded-xl overflow-hidden shrink-0 bg-brand-light-purple">
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  sizes="80px"
-                />
+          {paginated.map((img, i) => {
+            const liked = likedSrcs.has(img.src);
+            return (
+              <div
+                key={img.src + i}
+                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-purple/20 transition-all duration-200 flex items-center gap-4 p-4 cursor-pointer"
+                onClick={() => openLightbox(globalIndex(i))}
+              >
+                {/* Thumbnail */}
+                <div className="relative w-20 h-28 rounded-xl overflow-hidden shrink-0 bg-brand-light-purple">
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="80px"
+                  />
+                </div>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2 ${CATEGORY_COLORS[img.category] ?? "bg-gray-100 text-gray-600"}`}>
+                    {img.label}
+                  </span>
+                  <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed">{img.alt}</p>
+                </div>
+                {/* Actions */}
+                <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                  {/* WhatsApp */}
+                  <a
+                    href={buildWhatsAppUrl(img)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Enquire on WhatsApp"
+                    className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center shadow-sm hover:scale-110 transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <MessageCircle size={14} className="text-white" fill="currentColor" />
+                  </a>
+                  {/* Like */}
+                  <button
+                    onClick={(e) => toggleLike(img.src, e)}
+                    title={liked ? "Unlike" : "Like this look"}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 ${
+                      liked
+                        ? "bg-rose-500 text-white scale-110"
+                        : "bg-gray-100 text-gray-400 hover:bg-rose-50 hover:text-rose-400 opacity-0 group-hover:opacity-100"
+                    }`}
+                  >
+                    <Heart size={14} fill={liked ? "currentColor" : "none"} />
+                  </button>
+                </div>
+                {/* Arrow */}
+                <ChevronRight size={18} className="text-gray-300 group-hover:text-brand-purple group-hover:translate-x-1 transition-all shrink-0" />
               </div>
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2 ${CATEGORY_COLORS[img.category] ?? "bg-gray-100 text-gray-600"}`}>
-                  {img.label}
-                </span>
-                <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed">{img.alt}</p>
-              </div>
-              {/* Arrow */}
-              <ChevronRight size={18} className="text-gray-300 group-hover:text-brand-purple group-hover:translate-x-1 transition-all shrink-0" />
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {filtered.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
-          <p>No images in this category yet.</p>
+        <div className="text-center py-16 text-gray-400 flex flex-col items-center gap-3">
+          {activeFilter === "liked" ? (
+            <>
+              <Heart size={32} className="opacity-20" />
+              <p className="font-medium">No liked photos yet.</p>
+              <p className="text-sm text-gray-300">Tap the ♥ on any photo to save your favourite looks here.</p>
+            </>
+          ) : (
+            <p>No images in this category yet.</p>
+          )}
         </div>
       )}
 

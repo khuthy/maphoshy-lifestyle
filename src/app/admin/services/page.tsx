@@ -36,7 +36,8 @@ export default function AdminServicesPage() {
 
   function openEdit(s: ServiceContent) {
     setEditId(s.id);
-    setForm({ title: s.title, description: s.description, includes: [...s.includes], price_from: s.price_from });
+    // price_from is intentionally excluded — it is managed via the Pricing page
+    setForm({ title: s.title, description: s.description, includes: [...s.includes] });
     setError(null);
   }
 
@@ -153,12 +154,11 @@ export default function AdminServicesPage() {
                   </div>
                   <div>
                     <label className={labelCls}>Starting price</label>
-                    <input
-                      value={form.price_from ?? ""}
-                      onChange={(e) => setForm((f) => ({ ...f, price_from: e.target.value }))}
-                      placeholder="R 500"
-                      className={inputCls}
-                    />
+                    <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl">
+                      <span className="text-sm font-semibold text-amber-700">{s.price_from}</span>
+                      <span className="text-xs text-amber-500 ml-auto">Managed in Pricing</span>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">To change the price, update it in the <strong>Pricing</strong> page — it will sync here automatically.</p>
                   </div>
                 </div>
 

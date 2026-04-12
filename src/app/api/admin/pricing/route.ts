@@ -37,5 +37,13 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // ── Sync price to service_content ──────────────────────────────────────
+  const priceFrom = price.replace(/^From\s+/i, "").trim();
+  await db
+    .from("service_content")
+    .update({ price_from: priceFrom })
+    .eq("booking_key", booking_key);
+
   return NextResponse.json(data, { status: 201 });
 }

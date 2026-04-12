@@ -80,7 +80,7 @@ interface PortfolioGridProps {
 const LS_KEY = "ml_liked_images";
 
 function buildWhatsAppUrl(img: PortfolioImage): string {
-  const imageUrl = `https://maphoshylifestyle.co.za${img.src}`;
+  const imageUrl = `https://maphoshy-lifestyle.vercel.app${img.src}`;
   const message =
     `Hi Portia! I came across a look on the Maphoshy Lifestyle website that I absolutely love and would like to order.\n\n` +
     `*Look:* ${img.label}\n` +

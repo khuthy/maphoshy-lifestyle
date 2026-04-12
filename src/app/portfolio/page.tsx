@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PortfolioGrid, type PortfolioImage } from "@/components/sections/PortfolioGrid";
 import Link from "next/link";
 import { ArrowRight, Camera } from "lucide-react";
-import { createServerClient } from "@/lib/supabase";
+import { createPublicServerClient } from "@/lib/supabase";
 
 // Always render fresh — data is managed via the admin panel
 export const dynamic = "force-dynamic";
@@ -15,16 +15,17 @@ export const metadata: Metadata = {
 
 async function getPortfolioImages(): Promise<PortfolioImage[]> {
   try {
-    const db = createServerClient();
-    const { data } = await db
+    const db = createPublicServerClient();
+    const { data, error } = await db
       .from("portfolio_items")
       .select("src, alt, category, label")
       .eq("active", true)
       .order("display_order", { ascending: true });
 
+    if (error) console.error("[portfolio] portfolio_items error:", error.message);
     if (data && data.length > 0) return data as PortfolioImage[];
-  } catch {
-    // Fall through to empty array — PortfolioGrid will use fallback
+  } catch (err) {
+    console.error("[portfolio] unexpected error:", err);
   }
   return [];
 }

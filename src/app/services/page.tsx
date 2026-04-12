@@ -11,7 +11,7 @@ import {
   Check,
   type LucideIcon,
 } from "lucide-react";
-import { createServerClient } from "@/lib/supabase";
+import { createPublicServerClient } from "@/lib/supabase";
 
 // Always render fresh — data is managed via the admin panel
 export const dynamic = "force-dynamic";
@@ -48,14 +48,15 @@ const FALLBACK_SERVICES: ServiceRow[] = [
 
 async function getServices(): Promise<ServiceRow[]> {
   try {
-    const db = createServerClient();
-    const { data } = await db
+    const db = createPublicServerClient();
+    const { data, error } = await db
       .from("service_content")
       .select("*")
       .order("service_key");
+    if (error) console.error("[services] service_content error:", error.message);
     if (data && data.length > 0) return data as ServiceRow[];
-  } catch {
-    // Fall through to hardcoded fallback
+  } catch (err) {
+    console.error("[services] unexpected error:", err);
   }
   return FALLBACK_SERVICES;
 }

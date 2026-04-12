@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, HelpCircle, TrendingUp, Plus, Minus } from "lucide-react";
-import { createServerClient } from "@/lib/supabase";
+import { createPublicServerClient } from "@/lib/supabase";
 
 // Always render fresh — data is managed via the admin panel
 export const dynamic = "force-dynamic";
@@ -49,15 +49,20 @@ const FALLBACK_FAQS: FaqEntry[] = [
 
 async function getPricingData() {
   try {
-    const db = createServerClient();
+    const db = createPublicServerClient();
     const [pricingRes, faqsRes] = await Promise.all([
       db.from("pricing_entries").select("id, name, description, price, note, highlight, booking_key").eq("active", true).order("display_order"),
       db.from("faqs").select("id, question, answer").eq("active", true).order("display_order"),
     ]);
+
+    if (pricingRes.error) console.error("[pricing] pricing_entries error:", pricingRes.error.message);
+    if (faqsRes.error) console.error("[pricing] faqs error:", faqsRes.error.message);
+
     const pricing = pricingRes.data && pricingRes.data.length > 0 ? (pricingRes.data as PricingEntry[]) : FALLBACK_PRICING;
     const faqs = faqsRes.data && faqsRes.data.length > 0 ? (faqsRes.data as FaqEntry[]) : FALLBACK_FAQS;
     return { pricing, faqs };
-  } catch {
+  } catch (err) {
+    console.error("[pricing] unexpected error:", err);
     return { pricing: FALLBACK_PRICING, faqs: FALLBACK_FAQS };
   }
 }

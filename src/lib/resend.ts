@@ -6,8 +6,8 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY!);
 }
 
-const FROM_EMAIL = "bookings@maphoshylifestyle.co.za";
-const PORTIA_EMAIL = process.env.PORTIA_EMAIL ?? "portia@maphoshylifestyle.co.za";
+const FROM_EMAIL = process.env.PORTIA_EMAIL!;
+const PORTIA_EMAIL = process.env.PORTIA_EMAIL!;
 
 /**
  * Sends a booking confirmation email to the client

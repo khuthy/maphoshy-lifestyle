@@ -32,9 +32,11 @@ export async function POST(req: NextRequest) {
     const reference = generateBookingReference();
 
     // Determine site URL for PayFast return URLs
+    // In development, always use the actual request host so PayFast redirects back to localhost
     const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL ??
-      `https://${req.headers.get("host")}`;
+      process.env.NODE_ENV === "production"
+        ? (process.env.NEXT_PUBLIC_SITE_URL ?? `https://${req.headers.get("host")}`)
+        : `http://${req.headers.get("host")}`;
 
     // Save booking to Supabase with status "pending"
     const supabase = createServerClient();

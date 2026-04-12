@@ -30,7 +30,8 @@ export interface Booking {
 }
 
 /**
- * Browser client — uses anon key (RLS enforced)
+ * Browser / public client — uses anon key (RLS enforced).
+ * Safe for public reads — Supabase RLS "Public read active" policies allow this.
  * Lazy singleton to avoid build-time env errors.
  */
 let browserClient: ReturnType<typeof createClient> | null = null;
@@ -46,13 +47,39 @@ export function getSupabaseBrowser() {
 }
 
 /**
- * Server client — uses service role key (bypasses RLS)
- * Creates a new instance per request. Use ONLY in API routes / server actions.
+ * Public server client — uses anon key with Next.js cache disabled.
+ * For use in server components reading public CMS data (portfolio, pricing, services, FAQs).
+ * RLS "Public read active" policies allow these reads.
+ */
+export function createPublicServerClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: { persistSession: false },
+      global: {
+        // Explicitly bypass Next.js data cache — ensures fresh data on every request
+        fetch: (url: RequestInfo | URL, options: RequestInit = {}) =>
+          fetch(url, { ...options, cache: "no-store" }),
+      },
+    }
+  );
+}
+
+/**
+ * Server / admin client — uses service role key (bypasses RLS entirely).
+ * For use ONLY in API routes and admin operations.
  */
 export function createServerClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
+    {
+      auth: { persistSession: false },
+      global: {
+        fetch: (url: RequestInfo | URL, options: RequestInit = {}) =>
+          fetch(url, { ...options, cache: "no-store" }),
+      },
+    }
   );
 }

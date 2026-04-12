@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrandMark } from "@/components/layout/BrandMark";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -25,30 +26,22 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close menu on route change
-  useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
+  useEffect(() => { setIsOpen(false); }, [pathname]);
 
   return (
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         scrolled
-          ? "bg-white/95 backdrop-blur-sm shadow-sm"
+          ? "bg-white shadow-sm border-b border-gray-100"
           : "bg-transparent"
       )}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link href="/" className="flex flex-col leading-none group">
-            <span className="font-heading text-xl md:text-2xl font-bold text-brand-purple group-hover:text-[#4a1470] transition-colors">
-              Maphoshy
-            </span>
-            <span className="text-[10px] tracking-[0.2em] text-brand-gold uppercase font-medium">
-              Lifestyle
-            </span>
+          <Link href="/" className="flex items-center">
+            <BrandMark theme={scrolled ? "dark" : "light"} size="sm" />
           </Link>
 
           {/* Desktop nav */}
@@ -60,8 +53,12 @@ export function Header() {
                 className={cn(
                   "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
                   pathname === link.href
-                    ? "bg-brand-light-purple text-brand-purple"
-                    : "text-gray-700 hover:bg-brand-light-purple hover:text-brand-purple"
+                    ? scrolled
+                      ? "bg-brand-light-purple text-brand-purple"
+                      : "bg-white/15 text-white"
+                    : scrolled
+                    ? "text-gray-700 hover:bg-brand-light-purple hover:text-brand-purple"
+                    : "text-white/85 hover:bg-white/10 hover:text-white"
                 )}
               >
                 {link.label}
@@ -78,7 +75,7 @@ export function Header() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-lg text-brand-purple hover:bg-brand-light-purple transition-colors"
+            className={cn("md:hidden p-2 rounded-lg transition-colors", scrolled ? "text-brand-purple hover:bg-brand-light-purple" : "text-white hover:bg-white/10")}
             aria-label={isOpen ? "Close menu" : "Open menu"}
             aria-expanded={isOpen}
           >

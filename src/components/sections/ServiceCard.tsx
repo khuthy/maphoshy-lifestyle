@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ServiceCardProps {
@@ -20,66 +21,72 @@ export function ServiceCard({
   variant = "default",
 }: ServiceCardProps) {
   return (
-    <div
+    <Link
+      href={href}
       className={cn(
-        "group rounded-2xl p-6 md:p-8 flex flex-col gap-4 transition-all duration-300 hover:-translate-y-1",
+        "group rounded-2xl p-7 flex flex-col gap-5 transition-all duration-300 hover:-translate-y-1 block",
         variant === "default"
-          ? "bg-white border border-gray-100 hover:border-brand-light-purple hover:shadow-lg"
-          : "bg-brand-purple text-white hover:bg-[#4a1470] hover:shadow-xl"
+          ? "bg-white border border-gray-100 hover:border-brand-purple/20 hover:shadow-xl hover:shadow-brand-purple/5"
+          : "text-white hover:shadow-2xl"
       )}
+      style={variant === "featured" ? {
+        background: "linear-gradient(135deg, #5C1A8C 0%, #3d1160 100%)",
+      } : {}}
     >
-      <div
-        className={cn(
-          "w-12 h-12 rounded-xl flex items-center justify-center",
+      {/* Icon + arrow row */}
+      <div className="flex items-start justify-between">
+        <div className={cn(
+          "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300",
           variant === "default"
-            ? "bg-brand-light-purple text-brand-purple"
+            ? "bg-brand-light-purple text-brand-purple group-hover:bg-brand-purple group-hover:text-white"
             : "bg-white/15 text-white"
-        )}
-      >
-        <Icon size={24} />
+        )}>
+          <Icon size={22} />
+        </div>
+        <ArrowUpRight
+          size={18}
+          className={cn(
+            "transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5",
+            variant === "default" ? "text-gray-200 group-hover:text-brand-purple" : "text-white/30 group-hover:text-white"
+          )}
+        />
       </div>
 
+      {/* Text */}
       <div className="flex-1">
-        <h3
-          className={cn(
-            "font-heading text-lg font-semibold mb-2",
-            variant === "default" ? "text-gray-900" : "text-white"
-          )}
-        >
+        <h3 className={cn(
+          "font-heading text-lg font-semibold mb-2.5 leading-snug",
+          variant === "default" ? "text-gray-900" : "text-white"
+        )}>
           {title}
         </h3>
-        <p
-          className={cn(
-            "text-sm leading-relaxed",
-            variant === "default" ? "text-gray-600" : "text-white/80"
-          )}
-        >
+        <p className={cn(
+          "text-sm leading-relaxed",
+          variant === "default" ? "text-gray-500" : "text-white/70"
+        )}>
           {description}
         </p>
       </div>
 
-      <div className="flex items-center justify-between mt-2">
-        <span
-          className={cn(
-            "text-xs font-medium",
-            variant === "default" ? "text-brand-gold" : "text-brand-gold"
-          )}
-        >
+      {/* Price pill */}
+      <div className="flex items-center justify-between pt-1">
+        <span className={cn(
+          "text-xs font-semibold px-3 py-1.5 rounded-full",
+          variant === "default"
+            ? "bg-amber-50 text-brand-gold"
+            : "bg-white/10 text-brand-gold"
+        )}>
           {priceIndicator}
         </span>
-        <Link
-          href={href}
-          className={cn(
-            "text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all",
-            variant === "default"
-              ? "text-brand-purple"
-              : "text-white/90 hover:text-white"
-          )}
-        >
-          Learn more
-          <span className="text-lg leading-none">→</span>
-        </Link>
+        <span className={cn(
+          "text-xs font-semibold transition-all duration-200",
+          variant === "default"
+            ? "text-brand-purple group-hover:underline"
+            : "text-white/80 group-hover:text-white"
+        )}>
+          Learn more →
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Images, Settings, Tag, HelpCircle, LogOut, LayoutDashboard, Menu, X, CalendarCheck } from "lucide-react";
+import { Images, Settings, Tag, HelpCircle, LogOut, LayoutDashboard, Menu, X, CalendarCheck, ExternalLink } from "lucide-react";
 import { useState } from "react";
 
 const NAV = [
@@ -75,8 +75,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="px-3 py-4 border-t border-white/5">
+      {/* Bottom actions */}
+      <div className="px-3 py-4 border-t border-white/5 space-y-0.5">
+        <Link
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => setMobileOpen(false)}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white hover:bg-white/5 transition-all"
+        >
+          <ExternalLink size={16} />
+          View public site
+        </Link>
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white hover:bg-white/5 transition-all"
@@ -145,6 +155,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <LogOut size={18} />
           </button>
         </header>
+
+        {/* Desktop top bar */}
+        <div className="hidden lg:flex items-center justify-end px-8 py-3 border-b border-gray-200 bg-white">
+          <Link
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-500 hover:text-brand-purple border border-gray-200 hover:border-brand-purple/40 rounded-xl transition-all"
+          >
+            <ExternalLink size={14} />
+            View public site
+          </Link>
+        </div>
 
         <main className="flex-1 px-6 py-8 max-w-6xl w-full mx-auto">
           {children}

@@ -2,8 +2,9 @@
 
 import { useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff, Lock } from "lucide-react";
+import { Eye, EyeOff, Lock, ExternalLink } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 function LoginForm() {
   const router = useRouter();
@@ -178,9 +179,18 @@ function LoginForm() {
             </button>
           </form>
 
-          <p className="text-center text-white/20 text-xs mt-10">
-            Maphoshy Lifestyle &copy; {new Date().getFullYear()} &middot; Admin Access Only
-          </p>
+          <div className="flex items-center justify-center gap-4 mt-10">
+            <p className="text-white/20 text-xs">
+              Maphoshy Lifestyle &copy; {new Date().getFullYear()} &middot; Admin Access Only
+            </p>
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-xs text-white/30 hover:text-white/60 transition-colors"
+            >
+              <ExternalLink size={11} />
+              Public site
+            </Link>
+          </div>
         </div>
       </div>
     </div>

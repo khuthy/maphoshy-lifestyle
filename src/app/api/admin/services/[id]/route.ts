@@ -11,10 +11,13 @@ export async function PUT(
   }
 
   const body = await req.json() as Record<string, unknown>;
-  // Strip immutable fields from update payload
+  // Strip immutable / externally-managed fields from update payload.
+  // price_from is managed by the Pricing page and synced automatically —
+  // the Services form must never overwrite it.
   const updates = { ...body };
   delete updates.id;
   delete updates.service_key;
+  delete updates.price_from;
 
   const db = createServerClient();
   const { data, error } = await db

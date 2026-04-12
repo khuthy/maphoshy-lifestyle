@@ -53,9 +53,10 @@ export async function POST(req: NextRequest) {
     });
 
     if (dbError) {
-      console.error("Supabase insert error:", dbError);
+      console.error("Supabase insert error:", JSON.stringify(dbError));
+      const detail = process.env.NODE_ENV !== "production" ? dbError.message : undefined;
       return NextResponse.json(
-        { error: "Failed to create booking. Please try again." },
+        { error: "Failed to create booking. Please try again.", detail },
         { status: 500 }
       );
     }

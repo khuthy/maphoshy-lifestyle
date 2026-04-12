@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,30 +26,29 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close menu on route change
-  useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
+  useEffect(() => { setIsOpen(false); }, [pathname]);
 
   return (
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         scrolled
-          ? "bg-white/95 backdrop-blur-sm shadow-sm"
+          ? "bg-white/96 backdrop-blur-md shadow-sm border-b border-gray-100/60"
           : "bg-transparent"
       )}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <Link href="/" className="flex flex-col leading-none group">
-            <span className="font-heading text-xl md:text-2xl font-bold text-brand-purple group-hover:text-[#4a1470] transition-colors">
-              Maphoshy
-            </span>
-            <span className="text-[10px] tracking-[0.2em] text-brand-gold uppercase font-medium">
-              Lifestyle
-            </span>
+          {/* Logo image */}
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/assets/logo.png"
+              alt="Maphoshy Lifestyle"
+              width={140}
+              height={48}
+              className="h-10 md:h-12 w-auto object-contain"
+              priority
+            />
           </Link>
 
           {/* Desktop nav */}

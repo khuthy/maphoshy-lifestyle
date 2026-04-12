@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   Search, Mail, Phone, Calendar, CreditCard, X, Send,
   ChevronDown, TrendingUp, Clock, CheckCircle, AlertCircle, Filter,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { formatRand, getServiceLabel, formatPhone } from "@/lib/utils";
 
@@ -37,6 +38,8 @@ export default function AdminBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [replySubject, setReplySubject] = useState("");
   const [replyMessage, setReplyMessage] = useState("");
@@ -63,6 +66,9 @@ export default function AdminBookingsPage() {
     }
   }, [selectedBooking]);
 
+  // Reset page when filters change
+  useEffect(() => { setPage(1); }, [search, statusFilter]);
+
   const filtered = useMemo(() => {
     return bookings.filter((b) => {
       const matchStatus = statusFilter === "all" || b.payment_status === statusFilter;
@@ -75,6 +81,9 @@ export default function AdminBookingsPage() {
       return matchStatus && matchSearch;
     });
   }, [bookings, search, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // Stats
   const totalPaid = bookings.filter(b => b.payment_status === "paid").reduce((s, b) => s + b.amount, 0);
@@ -174,7 +183,7 @@ export default function AdminBookingsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((booking) => {
+          {paginated.map((booking) => {
             const status = STATUS_CONFIG[booking.payment_status] ?? STATUS_CONFIG.pending;
             const bookedOn = new Date(booking.created_at).toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" });
             const preferredDate = booking.preferred_date
@@ -246,6 +255,48 @@ export default function AdminBookingsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* ── Pagination ── */}
+      {!loading && filtered.length > PAGE_SIZE && (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+          <p className="text-sm text-gray-500">
+            Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length} bookings
+          </p>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-brand-light-purple hover:text-brand-purple disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft size={15} />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+              .reduce<(number | "…")[]>((acc, n, i, arr) => {
+                if (i > 0 && (n as number) - (arr[i - 1] as number) > 1) acc.push("…");
+                acc.push(n);
+                return acc;
+              }, [])
+              .map((n, i) =>
+                n === "…" ? (
+                  <span key={`e${i}`} className="w-9 h-9 flex items-center justify-center text-gray-400 text-sm">…</span>
+                ) : (
+                  <button key={n} onClick={() => setPage(n as number)}
+                    className={`w-9 h-9 rounded-xl border text-sm font-medium transition-colors ${page === n ? "bg-brand-purple text-white border-brand-purple" : "border-gray-200 text-gray-600 hover:bg-brand-light-purple hover:text-brand-purple"}`}>
+                    {n}
+                  </button>
+                )
+              )}
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-brand-light-purple hover:text-brand-purple disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight size={15} />
+            </button>
+          </div>
         </div>
       )}
 

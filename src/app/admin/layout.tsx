@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Images, Settings, Tag, HelpCircle, LogOut, LayoutDashboard, Sparkles, Menu, X, CalendarCheck } from "lucide-react";
+import { Images, Settings, Tag, HelpCircle, LogOut, LayoutDashboard, Menu, X, CalendarCheck } from "lucide-react";
 import { useState } from "react";
 
 const NAV = [
@@ -32,16 +33,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="px-6 py-6 border-b border-white/5">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-brand-gold/20 border border-brand-gold/30 flex items-center justify-center shrink-0">
-            <Sparkles size={14} className="text-brand-gold" />
+      <div className="px-5 py-5 border-b border-white/5">
+        <Link href="/admin" className="flex items-center gap-3 group">
+          <div className="relative w-9 h-9 shrink-0">
+            <Image
+              src="/assets/transparent-logo-png.png"
+              alt="Maphoshy Lifestyle"
+              fill
+              className="object-contain"
+              sizes="36px"
+            />
           </div>
-          <div>
-            <p className="text-white font-semibold text-sm leading-tight">Maphoshy</p>
-            <p className="text-white/40 text-xs">Admin Studio</p>
+          <div className="min-w-0">
+            <p className="text-white font-heading font-semibold text-sm leading-tight tracking-wide truncate">
+              Maphoshy Lifestyle
+            </p>
+            <p className="text-white/35 text-[10px] tracking-[0.15em] uppercase">Admin Studio</p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Nav */}
@@ -91,9 +100,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
           <aside className="absolute left-0 top-0 bottom-0 w-64 bg-[#111827] flex flex-col">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
-              <div className="flex items-center gap-2">
-                <Sparkles size={16} className="text-brand-gold" />
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+              <div className="flex items-center gap-2.5">
+                <div className="relative w-7 h-7 shrink-0">
+                  <Image
+                    src="/assets/transparent-logo-png.png"
+                    alt="Maphoshy Lifestyle"
+                    fill
+                    className="object-contain"
+                    sizes="28px"
+                  />
+                </div>
                 <span className="text-white font-semibold text-sm">ML Admin</span>
               </div>
               <button onClick={() => setMobileOpen(false)} className="text-white/40 hover:text-white">
@@ -112,7 +129,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <button onClick={() => setMobileOpen(true)} className="text-white/60 hover:text-white">
             <Menu size={20} />
           </button>
-          <span className="text-white font-semibold text-sm">ML Admin</span>
+          <div className="flex items-center gap-2">
+            <div className="relative w-6 h-6">
+              <Image
+                src="/assets/transparent-logo-png.png"
+                alt="Maphoshy Lifestyle"
+                fill
+                className="object-contain"
+                sizes="24px"
+              />
+            </div>
+            <span className="text-white font-semibold text-sm">ML Admin</span>
+          </div>
           <button onClick={handleLogout} className="text-white/40 hover:text-white">
             <LogOut size={18} />
           </button>

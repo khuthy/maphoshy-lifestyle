@@ -2,7 +2,8 @@
 
 import { useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff, Lock, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Lock } from "lucide-react";
+import Image from "next/image";
 
 function LoginForm() {
   const router = useRouter();
@@ -46,26 +47,27 @@ function LoginForm() {
           <div className="absolute top-[40%] left-[30%] w-[40%] h-[40%] rounded-full bg-brand-purple/20 blur-[80px]" />
         </div>
 
-        {/* Grid texture overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
+        {/* Grid texture */}
+        <div className="absolute inset-0 opacity-[0.04]"
+          style={{ backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
-          {/* Top — logo mark */}
+          {/* Top — logo */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-brand-gold/20 border border-brand-gold/30 flex items-center justify-center">
-              <Sparkles size={16} className="text-brand-gold" />
+            <div className="relative w-10 h-10 shrink-0">
+              <Image
+                src="/assets/transparent-logo-png.png"
+                alt="Maphoshy Lifestyle"
+                fill
+                className="object-contain"
+                sizes="40px"
+              />
             </div>
-            <span className="font-heading text-white/80 text-sm tracking-widest uppercase">
-              Maphoshy Lifestyle
-            </span>
+            <div>
+              <p className="font-heading text-white font-semibold text-sm tracking-wide">Maphoshy Lifestyle</p>
+              <p className="text-white/35 text-[10px] tracking-[0.2em] uppercase">Admin Studio</p>
+            </div>
           </div>
 
           {/* Centre — headline */}
@@ -87,11 +89,7 @@ function LoginForm() {
           {/* Bottom — decorative dots */}
           <div className="flex gap-2">
             {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="h-1 rounded-full bg-white/20"
-                style={{ width: i === 0 ? 24 : 8 }}
-              />
+              <div key={i} className="h-1 rounded-full bg-white/20" style={{ width: i === 0 ? 24 : 8 }} />
             ))}
           </div>
         </div>
@@ -106,28 +104,30 @@ function LoginForm() {
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-[#0a0a0a]">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-2 mb-10">
-            <div className="w-8 h-8 rounded-lg bg-brand-gold/20 border border-brand-gold/30 flex items-center justify-center">
-              <Sparkles size={14} className="text-brand-gold" />
+          <div className="lg:hidden flex items-center gap-3 mb-10">
+            <div className="relative w-9 h-9 shrink-0">
+              <Image
+                src="/assets/transparent-logo-png.png"
+                alt="Maphoshy Lifestyle"
+                fill
+                className="object-contain"
+                sizes="36px"
+              />
             </div>
-            <span className="font-heading text-white/70 text-sm tracking-widest uppercase">
-              Maphoshy Lifestyle
-            </span>
+            <div>
+              <p className="font-heading text-white/80 text-sm tracking-wide">Maphoshy Lifestyle</p>
+              <p className="text-white/35 text-[10px] tracking-[0.15em] uppercase">Admin Studio</p>
+            </div>
           </div>
 
           {/* Heading */}
           <div className="mb-10">
-            <h2 className="font-heading text-3xl font-bold text-white mb-2">
-              Welcome back
-            </h2>
-            <p className="text-white/40 text-sm">
-              Sign in to your admin panel to continue.
-            </p>
+            <h2 className="font-heading text-3xl font-bold text-white mb-2">Welcome back</h2>
+            <p className="text-white/40 text-sm">Sign in to your admin panel to continue.</p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Password field */}
             <div>
               <label className="block text-xs text-white/50 tracking-wider uppercase mb-2">
                 Admin Password
@@ -156,7 +156,6 @@ function LoginForm() {
               </div>
             </div>
 
-            {/* Error */}
             {error && (
               <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
@@ -164,34 +163,21 @@ function LoginForm() {
               </div>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading || !password}
               className="w-full relative overflow-hidden py-4 rounded-2xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed group"
-              style={{
-                background: loading
-                  ? "#3d1260"
-                  : "linear-gradient(135deg, #5C1A8C 0%, #7a22b8 100%)",
-              }}
+              style={{ background: loading ? "#3d1260" : "linear-gradient(135deg, #5C1A8C 0%, #7a22b8 100%)" }}
             >
-              {/* Shimmer effect */}
               <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
               <span className="relative text-white flex items-center justify-center gap-2">
                 {loading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Signing in…
-                  </>
-                ) : (
-                  "Sign In"
-                )}
+                  <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Signing in…</>
+                ) : "Sign In"}
               </span>
             </button>
           </form>
 
-          {/* Footer note */}
           <p className="text-center text-white/20 text-xs mt-10">
             Maphoshy Lifestyle &copy; {new Date().getFullYear()} &middot; Admin Access Only
           </p>

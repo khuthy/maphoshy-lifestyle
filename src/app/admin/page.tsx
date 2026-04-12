@@ -101,7 +101,31 @@ export default async function AdminDashboard() {
           </div>
         ))}
       </div>
-
+{/* ── Quick-nav cards ── */}
+      <div>
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Manage Content</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {SECTIONS.map(({ href, icon: Icon, title, description, color }) => (
+            <Link
+              key={href}
+              href={href}
+              className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-purple/30 transition-all group"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
+                  <Icon size={20} />
+                </div>
+                <ArrowUpRight
+                  size={16}
+                  className="text-gray-300 group-hover:text-brand-purple group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
+                />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
       {/* ── Recent bookings ── */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {/* Header */}
@@ -180,31 +204,7 @@ export default async function AdminDashboard() {
         )}
       </div>
 
-      {/* ── Quick-nav cards ── */}
-      <div>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Manage Content</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {SECTIONS.map(({ href, icon: Icon, title, description, color }) => (
-            <Link
-              key={href}
-              href={href}
-              className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-purple/30 transition-all group"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-                  <Icon size={20} />
-                </div>
-                <ArrowUpRight
-                  size={16}
-                  className="text-gray-300 group-hover:text-brand-purple group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
-                />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
-            </Link>
-          ))}
-        </div>
-      </div>
+      
 
     </div>
   );

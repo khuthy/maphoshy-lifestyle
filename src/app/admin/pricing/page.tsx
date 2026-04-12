@@ -100,10 +100,10 @@ export default function AdminPricingPage() {
   }
 
   return (
-    <div>
+    <div className="w-full max-w-full overflow-x-hidden">
       {/* Page header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
+      <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold text-gray-900">Pricing</h1>
           <p className="text-sm text-gray-500 mt-1">
             {loading ? "Loading…" : `${entries.length} pricing entries`}
@@ -111,13 +111,13 @@ export default function AdminPricingPage() {
         </div>
         <button
           onClick={openNew}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-purple text-white text-sm font-semibold rounded-xl hover:bg-[#4a1470] transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-brand-purple text-white text-sm font-semibold rounded-xl hover:bg-[#4a1470] transition-colors shadow-sm shrink-0"
         >
           <Plus size={16} /> Add Entry
         </button>
       </div>
 
-      {/* Form panel */}
+      {/* Slide-in form drawer */}
       {showForm && (
         <>
           <div className="fixed inset-0 bg-black/40 z-40" onClick={closeForm} />
@@ -130,7 +130,8 @@ export default function AdminPricingPage() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
-              <div className="grid grid-cols-2 gap-4">
+              {/* Name + Price on separate rows on mobile, side by side on sm+ */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Name</label>
                   <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className={inputCls} placeholder="Consultation" />
@@ -147,7 +148,7 @@ export default function AdminPricingPage() {
                   rows={3} className={`${inputCls} resize-none`} />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Note <span className="normal-case font-normal text-gray-400">(optional)</span></label>
                   <input value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
@@ -213,43 +214,53 @@ export default function AdminPricingPage() {
           {entries.map((entry) => (
             <div
               key={entry.id}
-              className={`bg-white rounded-2xl p-4 sm:p-5 flex items-center gap-4 border shadow-sm transition-all ${entry.highlight ? "border-brand-gold/40 bg-amber-50/30" : "border-gray-100"}`}
+              className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${entry.highlight ? "border-brand-gold/40 bg-amber-50/30" : "border-gray-100"}`}
             >
-              {/* Highlight star */}
-              <button
-                onClick={() => toggleHighlight(entry)}
-                title="Toggle most popular"
-                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all ${entry.highlight ? "text-brand-gold bg-amber-100" : "text-gray-300 hover:text-brand-gold hover:bg-amber-50"}`}
-              >
-                <Star size={16} fill={entry.highlight ? "currentColor" : "none"} />
-              </button>
+              <div className="p-4 sm:p-5">
+                {/* Top row: star + name + actions */}
+                <div className="flex items-start gap-3 min-w-0">
+                  {/* Highlight star */}
+                  <button
+                    onClick={() => toggleHighlight(entry)}
+                    title="Toggle most popular"
+                    className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all ${entry.highlight ? "text-brand-gold bg-amber-100" : "text-gray-300 hover:text-brand-gold hover:bg-amber-50"}`}
+                  >
+                    <Star size={15} fill={entry.highlight ? "currentColor" : "none"} />
+                  </button>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                  <span className="font-semibold text-gray-900 text-sm">{entry.name}</span>
-                  {entry.highlight && (
-                    <span className="text-xs font-medium text-brand-gold bg-amber-100 px-2 py-0.5 rounded-full">Most Popular</span>
-                  )}
+                  {/* Name + description — flex-1 + min-w-0 prevents overflow */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                      <span className="font-semibold text-gray-900 text-sm break-words">{entry.name}</span>
+                      {entry.highlight && (
+                        <span className="text-xs font-medium text-brand-gold bg-amber-100 px-2 py-0.5 rounded-full shrink-0">Most Popular</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">{entry.description}</p>
+                    {entry.note && <p className="text-xs text-gray-400 mt-0.5 italic">{entry.note}</p>}
+                  </div>
+
+                  {/* Action buttons — always shrink, never push card wider */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => openEdit(entry)}
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-brand-purple hover:bg-brand-light-purple transition-colors"
+                    >
+                      <Pencil size={13} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(entry)}
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-500 truncate">{entry.description}</p>
-                {entry.note && <p className="text-xs text-gray-400 mt-0.5 italic">{entry.note}</p>}
-              </div>
 
-              <span className="font-bold text-brand-purple text-sm whitespace-nowrap shrink-0">{entry.price}</span>
-
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  onClick={() => openEdit(entry)}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-brand-purple hover:bg-brand-light-purple transition-colors"
-                >
-                  <Pencil size={14} />
-                </button>
-                <button
-                  onClick={() => handleDelete(entry)}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                >
-                  <Trash2 size={14} />
-                </button>
+                {/* Price on its own row — never causes horizontal overflow */}
+                <div className="mt-2 pl-11">
+                  <span className="font-bold text-brand-purple text-sm">{entry.price}</span>
+                </div>
               </div>
             </div>
           ))}

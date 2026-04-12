@@ -213,7 +213,7 @@ export default async function PricingPage() {
           </div>
 
           <div className="space-y-3">
-            {faqs.map((faq, i) => (
+            {faqs.map((faq) => (
               <details
                 key={faq.id}
                 className="group bg-brand-bg rounded-2xl border border-gray-100 overflow-hidden hover:border-brand-purple/20 transition-colors"

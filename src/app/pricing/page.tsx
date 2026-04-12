@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, HelpCircle } from "lucide-react";
+import { ArrowRight, HelpCircle, TrendingUp, Plus, Minus } from "lucide-react";
 import { createServerClient } from "@/lib/supabase";
 
 export const metadata: Metadata = {
@@ -64,130 +64,165 @@ export default async function PricingPage() {
 
   return (
     <>
-      {/* Header */}
-      <div className="pt-28 pb-16 bg-brand-purple">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-brand-gold text-sm font-medium tracking-[0.25em] uppercase mb-4">
-            Transparent Pricing
-          </p>
-          <h1 className="font-heading text-5xl md:text-6xl font-bold text-white mb-6">
+      {/* ── Page Header ── */}
+      <div className="relative pt-32 pb-20 overflow-hidden" style={{ background: "linear-gradient(135deg, #3d1160 0%, #5C1A8C 50%, #7B22BC 100%)" }}>
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] pointer-events-none"
+          style={{ background: "radial-gradient(circle at top right, rgba(201,150,74,0.15) 0%, transparent 60%)" }} />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[300px] pointer-events-none"
+          style={{ background: "radial-gradient(circle at bottom left, rgba(255,255,255,0.04) 0%, transparent 60%)" }} />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6"
+            style={{ background: "rgba(201,150,74,0.15)", border: "1px solid rgba(201,150,74,0.3)" }}>
+            <TrendingUp size={12} className="text-brand-gold" />
+            <span className="text-brand-gold text-xs font-semibold tracking-[0.25em] uppercase">Transparent Pricing</span>
+          </div>
+          <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
             Investment in Yourself
           </h1>
-          <p className="text-white/75 text-lg max-w-2xl mx-auto">
+          <p className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed">
             Quality service at clear, honest prices. Every rand you invest in
             your style is an investment in how you show up in the world.
           </p>
+          <div className="flex items-center justify-center gap-4 mt-8">
+            <div className="h-px w-16 bg-brand-gold/40" />
+            <div className="w-1.5 h-1.5 rounded-full bg-brand-gold/60" />
+            <div className="h-px w-16 bg-brand-gold/40" />
+          </div>
         </div>
       </div>
 
-      {/* Pricing table */}
+      {/* ── Pricing Cards ── */}
       <section className="py-20 bg-brand-bg">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-4">
-            {pricing.map((service) => (
-              <div
-                key={service.id}
-                className={`rounded-2xl p-6 md:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-shadow duration-200 ${
-                  service.highlight
-                    ? "bg-brand-purple text-white shadow-lg"
-                    : "bg-white border border-gray-100 shadow-sm hover:shadow-md"
-                }`}
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
-                    <h3
-                      className={`font-heading text-lg font-semibold ${
-                        service.highlight ? "text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {service.name}
-                    </h3>
-                    {service.highlight && (
-                      <span className="text-xs bg-brand-gold text-white px-2 py-0.5 rounded-full font-medium">
-                        Most Popular
-                      </span>
-                    )}
+            {pricing.map((service) =>
+              service.highlight ? (
+                /* ─ Featured / Highlighted card ─ */
+                <div
+                  key={service.id}
+                  className="relative rounded-3xl overflow-hidden shadow-2xl"
+                  style={{ background: "linear-gradient(135deg, #3d1160 0%, #5C1A8C 60%, #7B22BC 100%)" }}
+                >
+                  {/* shine strip */}
+                  <div className="absolute top-0 left-0 right-0 h-px"
+                    style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)" }} />
+
+                  <div className="p-6 md:p-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-heading text-xl font-bold text-white">
+                            {service.name}
+                          </h3>
+                          <span className="text-xs bg-brand-gold text-white px-3 py-1 rounded-full font-semibold shrink-0">
+                            Most Popular
+                          </span>
+                        </div>
+                        <p className="text-white/65 text-sm leading-relaxed">{service.description}</p>
+                        {service.note && (
+                          <p className="text-white/40 text-xs mt-1.5">{service.note}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 shrink-0">
+                        <p className="font-heading text-3xl font-bold text-brand-gold">
+                          {service.price}
+                        </p>
+                        <Link
+                          href={`/book?service=${service.booking_key}`}
+                          className="px-6 py-2.5 rounded-full text-sm font-semibold bg-white text-brand-purple hover:bg-brand-gold hover:text-white transition-all shadow-md"
+                        >
+                          Book
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                  <p
-                    className={`text-sm leading-relaxed ${
-                      service.highlight ? "text-white/75" : "text-gray-600"
-                    }`}
-                  >
-                    {service.description}
-                  </p>
-                  {service.note && (
-                    <p
-                      className={`text-xs mt-1 ${
-                        service.highlight ? "text-white/50" : "text-gray-400"
-                      }`}
-                    >
-                      {service.note}
-                    </p>
-                  )}
                 </div>
-                <div className="flex items-center gap-4 shrink-0">
-                  <p
-                    className={`font-heading text-2xl font-bold ${
-                      service.highlight ? "text-brand-gold" : "text-brand-purple"
-                    }`}
-                  >
-                    {service.price}
-                  </p>
-                  <Link
-                    href={`/book?service=${service.booking_key}`}
-                    className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                      service.highlight
-                        ? "bg-white text-brand-purple hover:bg-brand-gold hover:text-white"
-                        : "bg-brand-purple text-white hover:bg-[#4a1470]"
-                    }`}
-                  >
-                    Book
-                  </Link>
+              ) : (
+                /* ─ Regular card ─ */
+                <div
+                  key={service.id}
+                  className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-brand-purple/20 transition-all duration-300"
+                >
+                  {/* Left colored accent */}
+                  <div className="flex">
+                    <div className="w-1 rounded-l-2xl shrink-0"
+                      style={{ background: "linear-gradient(180deg, #5C1A8C, #C9964A)" }} />
+                    <div className="flex-1 p-6 md:p-7">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-heading text-lg font-bold text-gray-900 mb-1">
+                            {service.name}
+                          </h3>
+                          <p className="text-gray-500 text-sm leading-relaxed">{service.description}</p>
+                          {service.note && (
+                            <p className="text-gray-400 text-xs mt-1.5">{service.note}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 shrink-0">
+                          <p className="font-heading text-2xl font-bold text-brand-purple">
+                            {service.price}
+                          </p>
+                          <Link
+                            href={`/book?service=${service.booking_key}`}
+                            className="px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                            style={{ background: "linear-gradient(135deg, #5C1A8C, #7B22BC)" }}
+                          >
+                            Book
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
 
-          <div className="mt-8 p-5 bg-brand-light-purple rounded-2xl">
-            <div className="flex gap-3">
-              <HelpCircle size={20} className="text-brand-purple shrink-0 mt-0.5" />
-              <p className="text-sm text-gray-700">
-                <strong className="text-brand-purple">Not sure where to start?</strong>{" "}
-                The Style Discovery Session (R 350) is designed for exactly that
-                — Portia will guide you to the right service for your needs.{" "}
-                <Link href="/book?service=style_discovery" className="text-brand-purple font-semibold underline underline-offset-2">
-                  Book it here.
-                </Link>
-              </p>
-            </div>
+          {/* Hint box */}
+          <div className="mt-10 p-6 rounded-2xl flex gap-4" style={{ background: "rgba(92,26,140,0.06)", border: "1px solid rgba(92,26,140,0.12)" }}>
+            <HelpCircle size={20} className="text-brand-purple shrink-0 mt-0.5" />
+            <p className="text-sm text-gray-700 leading-relaxed">
+              <strong className="text-brand-purple">Not sure where to start?</strong>{" "}
+              The Style Discovery Session (R&nbsp;350) is designed for exactly that
+              — Portia will guide you to the right service for your needs.{" "}
+              <Link href="/book?service=style_discovery" className="text-brand-purple font-semibold underline underline-offset-2 hover:text-[#4a1470]">
+                Book it here.
+              </Link>
+            </p>
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-16 bg-white">
+      {/* ── FAQ ── */}
+      <section className="py-20 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-gray-900">
+          <div className="text-center mb-14">
+            <p className="text-brand-gold text-xs font-bold tracking-[0.2em] uppercase mb-3">Got Questions?</p>
+            <h2 className="font-heading text-4xl md:text-5xl font-bold text-gray-900">
               Frequently Asked Questions
             </h2>
           </div>
-          <div className="space-y-4">
-            {faqs.map((faq) => (
+
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
               <details
                 key={faq.id}
-                className="group bg-brand-bg rounded-2xl border border-gray-100 overflow-hidden"
+                className="group bg-brand-bg rounded-2xl border border-gray-100 overflow-hidden hover:border-brand-purple/20 transition-colors"
               >
-                <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
-                  <span className="font-semibold text-gray-900 pr-4">
+                <summary className="flex items-center justify-between px-6 py-5 cursor-pointer list-none gap-4">
+                  <span className="font-semibold text-gray-900 text-[15px] leading-snug">
                     {faq.question}
                   </span>
-                  <span className="shrink-0 w-7 h-7 rounded-full bg-brand-light-purple flex items-center justify-center text-brand-purple font-bold text-lg leading-none group-open:rotate-45 transition-transform duration-200">
-                    +
+                  <span className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200"
+                    style={{ background: "rgba(92,26,140,0.1)" }}>
+                    <Plus size={16} className="text-brand-purple group-open:hidden" />
+                    <Minus size={16} className="text-brand-purple hidden group-open:block" />
                   </span>
                 </summary>
                 <div className="px-6 pb-6">
-                  <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
+                  <div className="h-px bg-gray-100 mb-4" />
+                  <p className="text-gray-500 text-sm leading-relaxed">{faq.answer}</p>
                 </div>
               </details>
             ))}
@@ -195,21 +230,24 @@ export default async function PricingPage() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-16 bg-brand-bg">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+      {/* ── Final CTA ── */}
+      <section className="py-20 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #1a0530 0%, #3d1160 100%)" }}>
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at center, rgba(201,150,74,0.08) 0%, transparent 70%)" }} />
+
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="font-heading text-4xl md:text-5xl font-bold text-white mb-4">
             Ready to book?
           </h2>
-          <p className="text-gray-600 mb-8 text-lg">
+          <p className="text-white/60 mb-10 text-lg leading-relaxed">
             Choose your service and secure your slot today.
           </p>
           <Link
             href="/book"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-brand-purple text-white font-semibold rounded-full hover:bg-[#4a1470] transition-all shadow-md hover:shadow-lg text-base"
+            className="inline-flex items-center gap-2 px-10 py-4 bg-brand-gold text-white font-semibold rounded-full hover:bg-[#b8833e] transition-all shadow-lg text-base group"
           >
             Book a Consult
-            <ArrowRight size={16} />
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
       </section>

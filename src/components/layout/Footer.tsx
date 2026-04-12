@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { MessageCircle, Mail } from "lucide-react";
+import { BrandMark } from "@/components/layout/BrandMark";
 
 const WHATSAPP_NUMBER = "27787513728";
 const WHATSAPP_MESSAGE = encodeURIComponent(
@@ -42,13 +42,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {/* Brand column */}
           <div className="space-y-5">
-            <Image
-              src="/assets/logo.png"
-              alt="Maphoshy Lifestyle"
-              width={140}
-              height={48}
-              className="h-10 w-auto object-contain brightness-0 invert opacity-90"
-            />
+            <BrandMark theme="light" size="md" />
             <p className="text-gray-400 text-sm leading-relaxed">
               Personal styling and image consultancy based in South Africa.
               Helping you look and feel your absolute best.

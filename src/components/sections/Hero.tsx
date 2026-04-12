@@ -4,7 +4,7 @@ import { ArrowRight, Star } from "lucide-react";
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-end overflow-hidden">
+    <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -21,25 +21,14 @@ export function Hero() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#1a0530]/60 via-transparent to-transparent" />
       </div>
 
-      {/* Floating logo top-left on desktop */}
-      <div className="absolute top-24 left-8 z-20 hidden lg:block">
-        <Image
-          src="/assets/logo.png"
-          alt="Maphoshy Lifestyle"
-          width={120}
-          height={40}
-          className="h-10 w-auto object-contain opacity-90 brightness-0 invert"
-        />
-      </div>
-
       {/* Decorative top-right accent */}
       <div className="absolute top-0 right-0 w-96 h-96 pointer-events-none z-0">
         <div className="absolute top-0 right-0 w-full h-full"
           style={{ background: "radial-gradient(circle at top right, rgba(201,150,74,0.12) 0%, transparent 60%)" }} />
       </div>
 
-      {/* Content — anchored to bottom */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 md:pb-24">
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20 md:pt-36 md:pb-28">
         <div className="max-w-3xl">
           {/* Eyebrow */}
           <div className="flex items-center gap-3 mb-6">

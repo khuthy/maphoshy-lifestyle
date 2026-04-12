@@ -7,7 +7,7 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY!);
 }
 
-const FROM_EMAIL = process.env.PORTIA_EMAIL!;
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL!;
 
 export async function POST(
   req: NextRequest,

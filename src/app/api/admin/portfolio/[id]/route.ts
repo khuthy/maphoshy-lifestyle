@@ -12,12 +12,25 @@ export async function PUT(
 
   const body = await req.json();
   const db = createServerClient();
-  const { data, error } = await db
+
+  // Attempt update with full body (includes catalog fields after migration)
+  let { data, error } = await db
     .from("portfolio_items")
     .update(body)
     .eq("id", params.id)
     .select()
     .single();
+
+  // If catalog columns don't exist yet (migration pending), retry without them
+  if (error?.message?.includes("price_range") || error?.message?.includes("show_in_catalog")) {
+    const { price_range, show_in_catalog, ...safeBody } = body;
+    ({ data, error } = await db
+      .from("portfolio_items")
+      .update(safeBody)
+      .eq("id", params.id)
+      .select()
+      .single());
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);

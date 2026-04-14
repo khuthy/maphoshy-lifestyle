@@ -52,6 +52,10 @@ async function getCatalogItems(): Promise<CatalogItem[]> {
       .eq("show_in_catalog", true)
       .order("display_order", { ascending: true });
 
+    // Migration pending — catalog columns don't exist yet; show empty state
+    if (error?.message?.includes("price_range") || error?.message?.includes("show_in_catalog")) {
+      return [];
+    }
     if (error) console.error("[catalog] portfolio_items error:", error.message);
     if (data && data.length > 0) return data as CatalogItem[];
   } catch (err) {

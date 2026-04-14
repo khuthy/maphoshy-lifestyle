@@ -225,7 +225,7 @@ export default async function CatalogPage() {
                 </h3>
                 <p className="text-gray-500 max-w-md mx-auto mb-8 text-sm leading-relaxed">
                   We specialise in custom designs and bespoke looks. Get in touch
-                  and we'll create exactly what you have in mind.
+                  and we&apos;ll create exactly what you have in mind.
                 </p>
                 <div className="flex flex-wrap gap-4 justify-center">
                   <Link

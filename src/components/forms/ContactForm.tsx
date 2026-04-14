@@ -66,7 +66,7 @@ export function ContactForm() {
           Message sent!
         </h3>
         <p className="text-gray-600 text-sm">
-          Portia will get back to you within 24 business hours.
+          We will get back to you within 24 business hours.
         </p>
         <button
           onClick={() => setStatus("idle")}
@@ -115,7 +115,7 @@ export function ContactForm() {
         <textarea
           {...register("message")}
           rows={4}
-          placeholder="Tell Portia what you're looking for..."
+          placeholder="Tell us what you're looking for..."
           className={`${inputCls} resize-none`}
         />
         {errors.message && (

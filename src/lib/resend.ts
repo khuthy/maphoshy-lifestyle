@@ -37,7 +37,7 @@ export async function sendClientConfirmation(booking: Booking): Promise<void> {
 
           <div style="padding: 40px 32px;">
             <h2 style="color: #5C1A8C; font-family: Georgia, serif; margin: 0 0 16px;">Your booking is confirmed!</h2>
-            <p style="color: #333; margin: 0 0 24px;">Hi ${booking.client_name}, thank you for booking with Portia at Maphoshy Lifestyle. We're excited to work with you!</p>
+            <p style="color: #333; margin: 0 0 24px;">Hi ${booking.client_name}, thank you for booking with Maphoshy Lifestyle. We're excited to work with you!</p>
 
             <div style="background: #F3EAF9; border-radius: 8px; padding: 24px; margin-bottom: 24px;">
               <p style="margin: 0 0 8px; color: #5C1A8C; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Booking Reference</p>
@@ -64,13 +64,13 @@ export async function sendClientConfirmation(booking: Booking): Promise<void> {
 
             <h3 style="color: #5C1A8C; font-family: Georgia, serif; margin: 0 0 12px; font-size: 18px;">What happens next?</h3>
             <ol style="color: #333; padding-left: 20px; margin: 0 0 24px; line-height: 1.8;">
-              <li>Portia will review your booking and reach out within <strong>24 hours</strong>.</li>
-              <li>She'll confirm your session date and time via WhatsApp or email.</li>
-              <li>You'll receive a brief questionnaire to help Portia prepare for your session.</li>
+              <li>We will review your booking and reach out within <strong>24 hours</strong>.</li>
+              <li>We'll confirm your session date and time via WhatsApp or email.</li>
+              <li>You'll receive a brief questionnaire to help us prepare for your session.</li>
               <li>Show up ready to transform your style!</li>
             </ol>
 
-            <p style="color: #666; font-size: 14px; margin: 0;">Have questions? Reply to this email or WhatsApp Portia directly.</p>
+            <p style="color: #666; font-size: 14px; margin: 0;">Have questions? Reply to this email or reach us directly on WhatsApp.</p>
           </div>
 
           <div style="background: #1a1a1a; padding: 24px 32px; text-align: center;">

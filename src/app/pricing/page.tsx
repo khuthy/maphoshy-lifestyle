@@ -29,10 +29,10 @@ interface FaqEntry {
 }
 
 const FALLBACK_PRICING: PricingEntry[] = [
-  { id: "1", name: "Style Discovery Session", description: "For undecided clients — Portia guides you to the right service.", price: "R 350", note: "Video call or in-person", highlight: false, booking_key: "style_discovery" },
+  { id: "1", name: "Style Discovery Session", description: "For undecided clients — we guide you to the right service.", price: "R 350", note: "Video call or in-person", highlight: false, booking_key: "style_discovery" },
   { id: "2", name: "Personal Style Consultation", description: "60–90 minute deep-dive into your style identity, colour palette and wardrobe goals.", price: "R 500", note: "In-person or virtual", highlight: true, booking_key: "consultation" },
   { id: "3", name: "Wardrobe Curation & Editing", description: "Full wardrobe audit, edit and organisation with a shopping gap list.", price: "From R 800", note: "Duration varies by wardrobe size", highlight: false, booking_key: "wardrobe" },
-  { id: "4", name: "Personal Shopping", description: "Portia sources and presents curated options aligned to your style and budget.", price: "From R 600", note: "+ travel costs if applicable", highlight: false, booking_key: "shopping" },
+  { id: "4", name: "Personal Shopping", description: "We source and present curated options aligned to your style and budget.", price: "From R 600", note: "+ travel costs if applicable", highlight: false, booking_key: "shopping" },
   { id: "5", name: "Corporate & Professional Styling", description: "Build a power wardrobe for your career and brand.", price: "From R 700", note: "Includes dress code analysis", highlight: false, booking_key: "corporate" },
   { id: "6", name: "Event & Occasion Styling", description: "One-off look creation for weddings, graduations, galas and more.", price: "From R 650", note: "Custom garment add-on available", highlight: false, booking_key: "event" },
   { id: "7", name: "Custom Garment Design", description: "Bespoke garments designed and made in-house from your measurements.", price: "From R 400", note: "Price excludes fabric cost", highlight: false, booking_key: "custom_garment" },
@@ -40,10 +40,10 @@ const FALLBACK_PRICING: PricingEntry[] = [
 ];
 
 const FALLBACK_FAQS: FaqEntry[] = [
-  { id: "1", question: "Why do I pay upfront?", answer: "The consultation fee secures Portia's time and expertise for your session. It ensures that only committed clients are scheduled, which means Portia can give each client her full attention without last-minute cancellations." },
-  { id: "2", question: "Can the consultation fee be deducted from my final service cost?", answer: "Yes — for clients who proceed to a full service (custom garment, wardrobe, etc.) within 30 days of their consultation, the consultation fee is credited towards the total. Speak to Portia directly to confirm this arrangement." },
+  { id: "1", question: "Why do I pay upfront?", answer: "The consultation fee secures our time and expertise for your session. It ensures that only committed clients are scheduled, which means we can give each client our full attention without last-minute cancellations." },
+  { id: "2", question: "Can the consultation fee be deducted from my final service cost?", answer: "Yes — for clients who proceed to a full service (custom garment, wardrobe, etc.) within 30 days of their consultation, the consultation fee is credited towards the total. Reach out to us directly to confirm this arrangement." },
   { id: "3", question: "What payment methods are accepted?", answer: "All payments are processed securely through PayFast. You can pay via credit or debit card (Visa, Mastercard), EFT, Capitec Pay, and SnapScan. Your card details are never shared with Maphoshy Lifestyle." },
-  { id: "4", question: "What happens if I need to cancel or reschedule?", answer: "Please give at least 48 hours' notice for cancellations or rescheduling. Portia will work with you to find a new date. Refunds for cancellations are handled on a case-by-case basis — reach out via WhatsApp or email." },
+  { id: "4", question: "What happens if I need to cancel or reschedule?", answer: "Please give at least 48 hours' notice for cancellations or rescheduling. We will work with you to find a new date. Refunds for cancellations are handled on a case-by-case basis — reach out via WhatsApp or email." },
   { id: "5", question: "Are virtual consultations available?", answer: "Yes! Most consultations can be done via video call. The Style Discovery Session, Personal Style Consultation and Personal Shopping are all available virtually. Custom garment and alteration services require an in-person fitting." },
 ];
 
@@ -193,7 +193,7 @@ export default async function PricingPage() {
             <p className="text-sm text-gray-700 leading-relaxed">
               <strong className="text-brand-purple">Not sure where to start?</strong>{" "}
               The Style Discovery Session (R&nbsp;350) is designed for exactly that
-              — Portia will guide you to the right service for your needs.{" "}
+              — we will guide you to the right service for your needs.{" "}
               <Link href="/book?service=style_discovery" className="text-brand-purple font-semibold underline underline-offset-2 hover:text-[#4a1470]">
                 Book it here.
               </Link>

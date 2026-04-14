@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Portfolio",
   description:
-    "Browse Portia Maluleke's portfolio of personal styling, custom garments, alterations, corporate and event styling work.",
+    "Browse our portfolio of personal styling, custom garments, alterations, corporate and event styling work.",
 };
 
 async function getPortfolioImages(): Promise<PortfolioImage[]> {

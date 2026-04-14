@@ -36,7 +36,7 @@ export async function POST(
 
   // Send the reply email via Resend
   const { error: sendError } = await getResend().emails.send({
-    from: `Portia — Maphoshy Lifestyle <${FROM_EMAIL}>`,
+    from: `Maphoshy Lifestyle <${FROM_EMAIL}>`,
     to: booking.client_email,
     replyTo: FROM_EMAIL,
     subject: subject.trim(),
@@ -59,7 +59,7 @@ export async function POST(
 
             <div style="border-top: 1px solid #eee; padding-top: 24px;">
               <p style="color: #999; font-size: 13px; margin: 0 0 4px;">With warmth,</p>
-              <p style="color: #5C1A8C; font-size: 14px; font-weight: 600; margin: 0;">Portia Maluleke</p>
+              <p style="color: #5C1A8C; font-size: 14px; font-weight: 600; margin: 0;">Maphoshy Lifestyle</p>
               <p style="color: #999; font-size: 13px; margin: 4px 0 0;">Maphoshy Lifestyle · maphoshylifestyle.co.za</p>
             </div>
           </div>

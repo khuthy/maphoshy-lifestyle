@@ -1,24 +1,20 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 
 export function Hero() {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/assets/image00001.jpeg"
-          alt="Maphoshy Lifestyle — Portia Maluleke"
-          fill
-          priority
-          quality={90}
-          className="object-cover object-top"
-          sizes="100vw"
-        />
-        {/* Rich layered overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1a0530]/95 via-[#1a0530]/50 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1a0530]/60 via-transparent to-transparent" />
+      {/* Background gradient */}
+      <div className="absolute inset-0 z-0" style={{ background: "linear-gradient(135deg, #1a0530 0%, #3d1160 40%, #5C1A8C 70%, #2a0848 100%)" }}>
+        {/* Subtle texture layer */}
+        <div className="absolute inset-0 opacity-[0.04]"
+          style={{ backgroundImage: "repeating-linear-gradient(45deg, #C9964A 0px, #C9964A 1px, transparent 1px, transparent 60px)" }} />
+        {/* Radial glow top-right */}
+        <div className="absolute top-0 right-0 w-[700px] h-[700px] pointer-events-none"
+          style={{ background: "radial-gradient(circle at top right, rgba(201,150,74,0.18) 0%, transparent 60%)" }} />
+        {/* Radial glow bottom-left */}
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] pointer-events-none"
+          style={{ background: "radial-gradient(circle at bottom left, rgba(123,34,188,0.3) 0%, transparent 60%)" }} />
       </div>
 
       {/* Decorative top-right accent */}

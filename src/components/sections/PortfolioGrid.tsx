@@ -11,7 +11,7 @@ type ImageCategory = "styling" | "custom_garment" | "alteration" | "corporate" |
 type FilterCategory = "all" | "liked" | ImageCategory;
 type ViewMode = "grid" | "list";
 
-const WHATSAPP_NUMBER = "27787513728";
+const WHATSAPP_NUMBER = "27673708546";
 
 export interface PortfolioImage {
   src: string;
@@ -82,7 +82,7 @@ const LS_KEY = "ml_liked_images";
 function buildWhatsAppUrl(img: PortfolioImage): string {
   const imageUrl = `https://maphoshy-lifestyle.vercel.app${img.src}`;
   const message =
-    `Hi Portia! I came across a look on the Maphoshy Lifestyle website that I absolutely love and would like to order.\n\n` +
+    `Hi! I came across a look on the Maphoshy Lifestyle website that I absolutely love and would like to order.\n\n` +
     `*Look:* ${img.label}\n` +
     `*Category:* ${FILTER_LABELS[img.category] ?? img.label}\n\n` +
     `*Image of the look I love:*\n` +

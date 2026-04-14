@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     template: "%s | Maphoshy Lifestyle",
   },
   description:
-    "Professional personal styling and image consultancy by Portia Maluleke. Based in South Africa. Quality is our priority.",
+    "Professional personal styling and image consultancy based in South Africa. Quality is our priority.",
   keywords: [
     "personal styling",
     "image consultancy",
@@ -16,7 +16,6 @@ export const metadata: Metadata = {
     "custom garments",
     "South Africa",
     "Maphoshy Lifestyle",
-    "Portia Maluleke",
   ],
   openGraph: {
     type: "website",
@@ -25,7 +24,7 @@ export const metadata: Metadata = {
     siteName: "Maphoshy Lifestyle",
     title: "Maphoshy Lifestyle — Personal Styling & Image Consultancy",
     description:
-      "Professional personal styling and image consultancy by Portia Maluleke. Quality is our priority.",
+      "Professional personal styling and image consultancy. Quality is our priority.",
   },
   twitter: {
     card: "summary_large_image",

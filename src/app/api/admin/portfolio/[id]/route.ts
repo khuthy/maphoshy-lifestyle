@@ -23,7 +23,8 @@ export async function PUT(
 
   // If catalog columns don't exist yet (migration pending), retry without them
   if (error?.message?.includes("price_range") || error?.message?.includes("show_in_catalog")) {
-    const { price_range: _pr, show_in_catalog: _sic, ...safeBody } = body;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { price_range, show_in_catalog, ...safeBody } = body;
     ({ data, error } = await db
       .from("portfolio_items")
       .update(safeBody)

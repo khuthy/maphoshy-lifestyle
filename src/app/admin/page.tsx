@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   Images, Settings, Tag, HelpCircle, ArrowUpRight,
   CalendarCheck, TrendingUp, Clock, CheckCircle, CreditCard,
-  Mail, Phone, Calendar, Star,
+  Mail, Phone, Calendar, Star, Video,
 } from "lucide-react";
 import { createServerClient } from "@/lib/supabase";
 import { formatRand, getServiceLabel, formatPhone } from "@/lib/utils";
@@ -61,6 +61,7 @@ const SECTIONS = [
   { href: "/admin/bookings",     icon: CalendarCheck, title: "Bookings",     description: "View all bookings, revenue and reply to clients.",              color: "bg-brand-light-purple text-brand-purple" },
   { href: "/admin/portfolio",    icon: Images,        title: "Portfolio",    description: "Upload, organise and toggle visibility of portfolio images.",     color: "bg-violet-50 text-violet-600" },
   { href: "/admin/testimonials", icon: Star,          title: "Testimonials", description: "Add, edit and manage client reviews shown on the home page.",    color: "bg-amber-50 text-amber-600" },
+  { href: "/admin/videos",       icon: Video,         title: "Videos",       description: "Add TikTok Get Ready With Me clips to the portfolio page.",      color: "bg-pink-50 text-pink-600" },
   { href: "/admin/services",     icon: Settings,      title: "Services",     description: "Edit service titles, descriptions and inclusions.",              color: "bg-blue-50 text-blue-600" },
   { href: "/admin/pricing",      icon: Tag,           title: "Pricing",      description: "Manage prices and highlight the most popular entry.",            color: "bg-sky-50 text-sky-600" },
   { href: "/admin/faqs",         icon: HelpCircle,    title: "FAQs",         description: "Add, edit and reorder frequently asked questions.",              color: "bg-emerald-50 text-emerald-600" },

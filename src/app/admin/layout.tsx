@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Images, Settings, Tag, HelpCircle, LogOut, LayoutDashboard, Menu, X, CalendarCheck, ExternalLink, Star } from "lucide-react";
+import { Images, Settings, Tag, HelpCircle, LogOut, LayoutDashboard, Menu, X, CalendarCheck, ExternalLink, Star, Video } from "lucide-react";
 import { useState } from "react";
 
 const NAV = [
@@ -11,6 +11,7 @@ const NAV = [
   { href: "/admin/bookings",      label: "Bookings",     icon: CalendarCheck,   exact: false },
   { href: "/admin/portfolio",     label: "Portfolio",    icon: Images,          exact: false },
   { href: "/admin/testimonials",  label: "Testimonials", icon: Star,            exact: false },
+  { href: "/admin/videos",        label: "Videos",       icon: Video,           exact: false },
   { href: "/admin/services",      label: "Services",     icon: Settings,        exact: false },
   { href: "/admin/pricing",       label: "Pricing",      icon: Tag,             exact: false },
   { href: "/admin/faqs",          label: "FAQs",         icon: HelpCircle,      exact: false },

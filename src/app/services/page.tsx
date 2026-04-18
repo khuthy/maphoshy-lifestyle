@@ -7,6 +7,14 @@ import {
   Briefcase,
   Star,
   Scissors,
+  Heart,
+  Palette,
+  Crown,
+  Gem,
+  Wand2,
+  Camera,
+  Users,
+  Settings,
   ArrowRight,
   Check,
   type LucideIcon,
@@ -24,6 +32,7 @@ export const metadata: Metadata = {
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles, Shirt, ShoppingBag, Briefcase, Star, Scissors,
+  Heart, Palette, Crown, Gem, Wand2, Camera, Users, Settings,
 };
 
 interface ServiceRow {
@@ -35,6 +44,8 @@ interface ServiceRow {
   price_from: string;
   booking_key: string;
   icon_name: string;
+  display_order?: number;
+  active?: boolean;
 }
 
 const FALLBACK_SERVICES: ServiceRow[] = [
@@ -52,9 +63,20 @@ async function getServices(): Promise<ServiceRow[]> {
     const { data, error } = await db
       .from("service_content")
       .select("*")
-      .order("service_key");
-    if (error) console.error("[services] service_content error:", error.message);
-    if (data && data.length > 0) return data as ServiceRow[];
+      .order("display_order", { ascending: true });
+    if (error) {
+      // Fallback for pre-migration state (display_order column may not exist yet)
+      const { data: fallbackData, error: fallbackError } = await db
+        .from("service_content")
+        .select("*")
+        .order("service_key");
+      if (!fallbackError && fallbackData && fallbackData.length > 0) return fallbackData as ServiceRow[];
+    }
+    if (data && data.length > 0) {
+      // Filter active if the column exists, otherwise show all
+      const active = (data as ServiceRow[]).filter(s => s.active !== false);
+      return active.length > 0 ? active : (data as ServiceRow[]);
+    }
   } catch (err) {
     console.error("[services] unexpected error:", err);
   }
@@ -84,8 +106,8 @@ export default async function ServicesPage() {
             Our Services
           </h1>
           <p className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed">
-            Six specialist services, all built around one goal: helping you
-            show up as the most powerful version of yourself.
+            Every service is built around one goal: helping you show up as
+            the most powerful version of yourself.
           </p>
           {/* Gold rule */}
           <div className="flex items-center justify-center gap-4 mt-8">

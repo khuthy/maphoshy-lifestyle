@@ -8,10 +8,18 @@ export async function GET(req: NextRequest) {
   }
 
   const db = createServerClient();
-  const { data, error } = await db
+  let { data, error } = await db
     .from("service_content")
     .select("*")
     .order("display_order", { ascending: true });
+
+  // Migration 006 pending — display_order column doesn't exist yet
+  if (error?.message?.includes("display_order")) {
+    ({ data, error } = await db
+      .from("service_content")
+      .select("*")
+      .order("service_key"));
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);

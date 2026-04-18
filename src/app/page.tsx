@@ -11,7 +11,7 @@ import {
   MessageCircle,
   CheckCircle2,
 } from "lucide-react";
-import { Hero } from "@/components/sections/Hero";
+import { Hero, type HeroImage } from "@/components/sections/Hero";
 import { ServiceCard } from "@/components/sections/ServiceCard";
 import { TestimonialCard } from "@/components/sections/TestimonialCard";
 import { createPublicServerClient } from "@/lib/supabase";
@@ -90,6 +90,23 @@ const FALLBACK_TESTIMONIALS = [
   },
 ];
 
+async function getHeroImages(): Promise<HeroImage[]> {
+  try {
+    const db = createPublicServerClient();
+    const { data, error } = await db
+      .from("portfolio_items")
+      .select("src, alt, label")
+      .eq("active", true)
+      .eq("show_in_hero", true)
+      .order("display_order", { ascending: true })
+      .limit(4);
+    if (!error && data && data.length === 4) {
+      return data.map(d => ({ src: d.src, alt: d.alt, label: d.label ?? "" }));
+    }
+  } catch { /* fallback to hardcoded */ }
+  return [];
+}
+
 async function getServiceCount(): Promise<number> {
   try {
     const db = createPublicServerClient();
@@ -126,11 +143,11 @@ const whyUs = [
 ];
 
 export default async function HomePage() {
-  const [testimonials, serviceCount] = await Promise.all([getTestimonials(), getServiceCount()]);
+  const [testimonials, serviceCount, heroImages] = await Promise.all([getTestimonials(), getServiceCount(), getHeroImages()]);
   return (
     <>
       {/* HERO */}
-      <Hero serviceCount={serviceCount} />
+      <Hero serviceCount={serviceCount} heroImages={heroImages} />
 
       {/* ABOUT */}
       <section className="py-24 bg-brand-bg overflow-hidden">

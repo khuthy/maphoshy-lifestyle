@@ -21,10 +21,10 @@ export async function PUT(
     .select()
     .single();
 
-  // If catalog columns don't exist yet (migration pending), retry without them
-  if (error?.message?.includes("price_range") || error?.message?.includes("show_in_catalog")) {
+  // If optional columns don't exist yet (migrations pending), retry without them
+  if (error?.message?.includes("price_range") || error?.message?.includes("show_in_catalog") || error?.message?.includes("show_in_hero")) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { price_range, show_in_catalog, ...safeBody } = body;
+    const { price_range, show_in_catalog, show_in_hero, ...safeBody } = body;
     ({ data, error } = await db
       .from("portfolio_items")
       .update(safeBody)

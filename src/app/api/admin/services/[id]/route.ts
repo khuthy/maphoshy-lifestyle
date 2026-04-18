@@ -16,12 +16,24 @@ export async function PUT(
   delete updates.service_key; // service_key is immutable after creation
 
   const db = createServerClient();
-  const { data, error } = await db
+  let { data, error } = await db
     .from("service_content")
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq("id", params.id)
     .select()
     .single();
+
+  // Migration 006 pending — retry stripping new columns
+  if (error?.message?.includes("display_order") || error?.message?.includes("active")) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { display_order, active, ...safeUpdates } = updates as Record<string, unknown>;
+    ({ data, error } = await db
+      .from("service_content")
+      .update({ ...safeUpdates, updated_at: new Date().toISOString() })
+      .eq("id", params.id)
+      .select()
+      .single());
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);

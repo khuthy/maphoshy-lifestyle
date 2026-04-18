@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   }
 
   const db = createServerClient();
-  const { data, error } = await db
+  let { data, error } = await db
     .from("service_content")
     .insert({
       service_key: service_key.trim().toLowerCase().replace(/\s+/g, "_"),
@@ -52,6 +52,23 @@ export async function POST(req: NextRequest) {
     })
     .select()
     .single();
+
+  // Migration 006 pending — retry without new columns
+  if (error?.message?.includes("display_order") || error?.message?.includes("active")) {
+    ({ data, error } = await db
+      .from("service_content")
+      .insert({
+        service_key: service_key.trim().toLowerCase().replace(/\s+/g, "_"),
+        title: title.trim(),
+        description: (description ?? "").trim(),
+        includes: includes ?? [],
+        price_from: (price_from ?? "").trim(),
+        booking_key: (booking_key ?? service_key).trim().toLowerCase().replace(/\s+/g, "_"),
+        icon_name: (icon_name ?? "Sparkles").trim(),
+      })
+      .select()
+      .single());
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data, { status: 201 });

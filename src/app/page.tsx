@@ -90,6 +90,18 @@ const FALLBACK_TESTIMONIALS = [
   },
 ];
 
+async function getServiceCount(): Promise<number> {
+  try {
+    const db = createPublicServerClient();
+    const { count, error } = await db
+      .from("service_content")
+      .select("id", { count: "exact", head: true })
+      .eq("active", true);
+    if (!error && count != null) return count;
+  } catch { /* fallback */ }
+  return 6;
+}
+
 async function getTestimonials() {
   try {
     const db = createPublicServerClient();
@@ -114,11 +126,11 @@ const whyUs = [
 ];
 
 export default async function HomePage() {
-  const testimonials = await getTestimonials();
+  const [testimonials, serviceCount] = await Promise.all([getTestimonials(), getServiceCount()]);
   return (
     <>
       {/* HERO */}
-      <Hero />
+      <Hero serviceCount={serviceCount} />
 
       {/* ABOUT */}
       <section className="py-24 bg-brand-bg overflow-hidden">

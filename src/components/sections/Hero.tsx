@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 
-export function Hero() {
+export function Hero({ serviceCount = 6 }: { serviceCount?: number }) {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
 
@@ -203,7 +203,7 @@ export function Hero() {
               {[
                 { value: "200+", label: "Clients styled" },
                 { value: "5★",   label: "Client rating" },
-                { value: "6",    label: "Services" },
+                { value: `${serviceCount}`, label: "Services" },
               ].map((stat) => (
                 <div key={stat.label}
                   className="flex items-center gap-2.5 px-4 py-2 rounded-full"

@@ -1,13 +1,67 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { BookingForm } from "@/components/forms/BookingForm";
 import { Shield, Clock, CreditCard, CalendarCheck } from "lucide-react";
+import { createPublicServerClient } from "@/lib/supabase";
+import { BookingForm, type BookingServiceOption } from "@/components/forms/BookingForm";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Book a Consult",
   description:
     "Book your personal styling consultation with Maphoshy Lifestyle.",
 };
+
+// Fallback services used when the DB is unavailable or empty
+const FALLBACK_SERVICES: BookingServiceOption[] = [
+  { service_key: "consultation", title: "Personal Style Consultation", price_from: "R 500" },
+  { service_key: "wardrobe", title: "Wardrobe Curation & Editing", price_from: "R 800" },
+  { service_key: "shopping", title: "Personal Shopping Services", price_from: "R 600" },
+  { service_key: "corporate", title: "Professional & Corporate Styling", price_from: "R 700" },
+  { service_key: "event", title: "Event & Special Occasion Styling", price_from: "R 650" },
+  { service_key: "custom_garment", title: "Custom Design (New Garment)", price_from: "R 400" },
+  { service_key: "alteration", title: "In-House Alterations", price_from: "R 400" },
+  { service_key: "style_discovery", title: "Style Discovery Session", price_from: "R 350" },
+];
+
+async function getBookingServices(): Promise<BookingServiceOption[]> {
+  try {
+    const db = createPublicServerClient();
+    const { data, error } = await db
+      .from("service_content")
+      .select("service_key, title, price_from, active, display_order")
+      .eq("active", true)
+      .order("display_order", { ascending: true });
+
+    if (error) {
+      // Fallback if display_order column not yet migrated
+      const { data: fallback, error: fe } = await db
+        .from("service_content")
+        .select("service_key, title, price_from, active")
+        .eq("active", true)
+        .order("service_key");
+      if (!fe && fallback && fallback.length > 0) {
+        return fallback.map((s) => ({
+          service_key: s.service_key as string,
+          title: s.title as string,
+          price_from: s.price_from as string | number | null,
+        }));
+      }
+      return FALLBACK_SERVICES;
+    }
+
+    if (data && data.length > 0) {
+      return data.map((s) => ({
+        service_key: s.service_key as string,
+        title: s.title as string,
+        price_from: s.price_from as string | number | null,
+      }));
+    }
+  } catch {
+    // silently fall through to fallback
+  }
+  return FALLBACK_SERVICES;
+}
 
 function BookingFormFallback() {
   return (
@@ -25,7 +79,9 @@ function BookingFormFallback() {
   );
 }
 
-export default function BookPage() {
+export default async function BookPage() {
+  const services = await getBookingServices();
+
   return (
     <>
       {/* ── Page Header ── */}
@@ -64,7 +120,7 @@ export default function BookPage() {
             {/* ── Form ── */}
             <div className="lg:col-span-2">
               <Suspense fallback={<BookingFormFallback />}>
-                <BookingForm />
+                <BookingForm services={services} />
               </Suspense>
             </div>
 

@@ -6,12 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useSearchParams } from "next/navigation";
 import { Upload, Loader2, AlertCircle } from "lucide-react";
-import {
-  ServiceType,
-  SERVICE_LABELS,
-  SERVICE_PRICES,
-  STYLE_WORDS,
-} from "@/types/booking";
+import { STYLE_WORDS } from "@/types/booking";
 import { formatRand } from "@/lib/utils";
 
 // ── Zod schema ──────────────────────────────────────────────────────────
@@ -22,16 +17,7 @@ const baseSchema = z.object({
     .string()
     .min(10, "Please enter a valid phone number")
     .regex(/^[0-9+\s()-]{10,15}$/, "Invalid phone number format"),
-  serviceType: z.enum([
-    "consultation",
-    "wardrobe",
-    "shopping",
-    "corporate",
-    "event",
-    "custom_garment",
-    "alteration",
-    "style_discovery",
-  ]),
+  serviceType: z.string().min(1, "Please select a service"),
   preferredDate: z.string().min(1, "Please select a preferred date"),
   notes: z.string().optional(),
   // Custom garment fields
@@ -57,16 +43,18 @@ const baseSchema = z.object({
 
 type BookingFormData = z.infer<typeof baseSchema>;
 
-const serviceOptions: { value: ServiceType; label: string }[] = [
-  { value: "consultation", label: SERVICE_LABELS.consultation },
-  { value: "wardrobe", label: SERVICE_LABELS.wardrobe },
-  { value: "shopping", label: SERVICE_LABELS.shopping },
-  { value: "corporate", label: SERVICE_LABELS.corporate },
-  { value: "event", label: SERVICE_LABELS.event },
-  { value: "custom_garment", label: SERVICE_LABELS.custom_garment },
-  { value: "alteration", label: SERVICE_LABELS.alteration },
-  { value: "style_discovery", label: SERVICE_LABELS.style_discovery },
-];
+export interface BookingServiceOption {
+  service_key: string;
+  title: string;
+  price_from: string | number | null;
+}
+
+function parsePrice(value: string | number | null | undefined): number {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === "number") return value;
+  const n = parseFloat(String(value).replace(/[^0-9.]/g, ""));
+  return isNaN(n) ? 0 : n;
+}
 
 // ── Input component ─────────────────────────────────────────────────────
 function Field({
@@ -103,15 +91,26 @@ const inputCls =
   "w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent text-gray-900 placeholder:text-gray-400 text-sm transition-all bg-white";
 
 // ── Main component ───────────────────────────────────────────────────────
-export function BookingForm() {
+export function BookingForm({ services }: { services: BookingServiceOption[] }) {
   const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
 
+  // Build lookup maps from the dynamic services list
+  const serviceLabels: Record<string, string> = Object.fromEntries(
+    services.map((s) => [s.service_key, s.title])
+  );
+  const servicePrices: Record<string, number> = Object.fromEntries(
+    services.map((s) => [s.service_key, parsePrice(s.price_from)])
+  );
+  const serviceOptions = services.map((s) => ({ value: s.service_key, label: s.title }));
+
+  // Determine default service from URL param or first available
+  const urlParam = searchParams.get("service") ?? "";
   const defaultService =
-    (searchParams.get("service") as ServiceType) || "consultation";
+    urlParam && serviceLabels[urlParam] ? urlParam : (services[0]?.service_key ?? "");
 
   const {
     register,
@@ -133,13 +132,14 @@ export function BookingForm() {
 
   // Update service when URL param changes
   useEffect(() => {
-    const param = searchParams.get("service") as ServiceType | null;
-    if (param && SERVICE_LABELS[param]) {
+    const param = searchParams.get("service");
+    if (param && serviceLabels[param]) {
       setValue("serviceType", param);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, setValue]);
 
-  const price = SERVICE_PRICES[serviceType as ServiceType] ?? 0;
+  const price = servicePrices[serviceType] ?? 0;
 
   const isCustomGarment = serviceType === "custom_garment";
   const isAlteration = serviceType === "alteration";
@@ -150,7 +150,6 @@ export function BookingForm() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileError(null);
     const files = Array.from(e.target.files ?? []);
-    const validFiles: File[] = [];
 
     for (const file of files) {
       if (!["image/jpeg", "image/png"].includes(file.type)) {
@@ -165,7 +164,6 @@ export function BookingForm() {
 
     const combined = [...uploadedFiles, ...files].slice(0, 5);
     setUploadedFiles(combined);
-    validFiles.push(...files);
   };
 
   const toggleStyleWord = (word: string) => {
@@ -607,7 +605,7 @@ export function BookingForm() {
           <div>
             <p className="font-semibold text-gray-900">Booking Summary</p>
             <p className="text-sm text-gray-500 mt-1">
-              {SERVICE_LABELS[serviceType as ServiceType]}
+              {serviceLabels[serviceType] ?? serviceType}
             </p>
           </div>
           <div className="text-right">

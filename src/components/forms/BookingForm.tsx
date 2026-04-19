@@ -265,7 +265,7 @@ export function BookingForm() {
           <Field label="Full Name" required error={errors.clientName?.message}>
             <input
               {...register("clientName")}
-              placeholder="Portia Maluleke"
+              placeholder="Your full name"
               className={inputCls}
             />
           </Field>
@@ -299,7 +299,7 @@ export function BookingForm() {
             label="Preferred Date"
             required
             error={errors.preferredDate?.message}
-            hint="This is your preferred date — Portia will confirm availability."
+            hint="This is your preferred date — we will confirm availability."
           >
             <input
               {...register("preferredDate")}

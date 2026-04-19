@@ -63,15 +63,15 @@ export default function BookingSuccessPage({ searchParams }: Props) {
                   },
                   {
                     icon: MessageCircle,
-                    step: "Portia will reach out",
+                    step: "We will reach out",
                     detail:
-                      "Within 24 hours, Portia will contact you via WhatsApp or email to confirm your session date and time.",
+                      "Within 24 hours, we will contact you via WhatsApp or email to confirm your session date and time.",
                   },
                   {
                     icon: Calendar,
                     step: "Prepare for your session",
                     detail:
-                      "You&apos;ll receive a brief questionnaire to help Portia make the most of your time together.",
+                      "You&apos;ll receive a brief questionnaire to help us make the most of your time together.",
                   },
                 ].map(({ icon: Icon, step, detail }, i) => (
                   <li key={i} className="flex gap-4">
@@ -98,13 +98,13 @@ export default function BookingSuccessPage({ searchParams }: Props) {
                 Back to Home
               </Link>
               <a
-                href={`https://wa.me/27787513728?text=${encodeURIComponent("Hi Portia! I just completed my booking. My reference is " + (reference ?? ""))}`}
+                href={`https://wa.me/27673708546?text=${encodeURIComponent("Hi! I just completed my booking. My reference is " + (reference ?? ""))}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border-2 border-brand-purple text-brand-purple font-semibold rounded-full hover:bg-brand-light-purple transition-all text-sm"
               >
                 <MessageCircle size={16} />
-                WhatsApp Portia
+                Chat on WhatsApp
               </a>
             </div>
           </div>

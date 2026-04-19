@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PortfolioGrid, type PortfolioImage } from "@/components/sections/PortfolioGrid";
 import Link from "next/link";
-import { ArrowRight, Camera } from "lucide-react";
+import { ArrowRight, Camera, Play } from "lucide-react";
 import { createPublicServerClient } from "@/lib/supabase";
 
 // Always render fresh — data is managed via the admin panel
@@ -10,8 +10,20 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Portfolio",
   description:
-    "Browse Portia Maluleke's portfolio of personal styling, custom garments, alterations, corporate and event styling work.",
+    "Browse our portfolio of personal styling, custom garments, alterations, corporate and event styling work.",
 };
+
+interface PortfolioVideo {
+  id: string;
+  tiktok_url: string;
+  title: string;
+  display_order: number;
+}
+
+function extractVideoId(url: string): string | null {
+  const match = url.match(/\/video\/(\d+)/);
+  return match ? match[1] : null;
+}
 
 async function getPortfolioImages(): Promise<PortfolioImage[]> {
   try {
@@ -30,8 +42,25 @@ async function getPortfolioImages(): Promise<PortfolioImage[]> {
   return [];
 }
 
+async function getPortfolioVideos(): Promise<PortfolioVideo[]> {
+  try {
+    const db = createPublicServerClient();
+    const { data, error } = await db
+      .from("portfolio_videos")
+      .select("id, tiktok_url, title, display_order")
+      .eq("active", true)
+      .order("display_order", { ascending: true });
+
+    if (error) console.error("[portfolio] portfolio_videos error:", error.message);
+    if (data && data.length > 0) return data as PortfolioVideo[];
+  } catch (err) {
+    console.error("[portfolio] unexpected error:", err);
+  }
+  return [];
+}
+
 export default async function PortfolioPage() {
-  const images = await getPortfolioImages();
+  const [images, videos] = await Promise.all([getPortfolioImages(), getPortfolioVideos()]);
 
   return (
     <>
@@ -75,6 +104,54 @@ export default async function PortfolioPage() {
           <PortfolioGrid images={images} />
         </div>
       </section>
+
+      {/* ── Videos section ── */}
+      {videos.length > 0 && (
+        <section className="py-16 bg-white border-t border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Section heading */}
+            <div className="flex items-center gap-4 mb-10">
+              <div className="w-10 h-10 rounded-xl bg-brand-light-purple flex items-center justify-center shrink-0">
+                <Play size={18} className="text-brand-purple" fill="currentColor" />
+              </div>
+              <div>
+                <h2 className="font-heading text-2xl md:text-3xl font-bold text-gray-900">
+                  Get Ready With Me
+                </h2>
+                <p className="text-sm text-gray-400 mt-0.5">Behind-the-scenes styling clips from TikTok</p>
+              </div>
+            </div>
+
+            {/* Video grid — portrait TikTok ratio */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {videos.map((video) => {
+                const videoId = extractVideoId(video.tiktok_url);
+                if (!videoId) return null;
+                return (
+                  <div key={video.id} className="flex flex-col gap-2">
+                    <div
+                      className="relative rounded-2xl overflow-hidden bg-black shadow-md hover:shadow-xl transition-shadow"
+                      style={{ paddingBottom: "177.78%" }}
+                    >
+                      <iframe
+                        src={`https://www.tiktok.com/embed/v2/${videoId}`}
+                        className="absolute inset-0 w-full h-full border-0"
+                        allowFullScreen
+                        allow="encrypted-media"
+                      />
+                    </div>
+                    {video.title && (
+                      <p className="text-xs text-gray-500 text-center leading-snug line-clamp-2 px-1">
+                        {video.title}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── CTA ── */}
       <section className="py-20 relative overflow-hidden bg-white">

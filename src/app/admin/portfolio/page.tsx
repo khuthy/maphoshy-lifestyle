@@ -19,6 +19,9 @@ interface PortfolioItem {
   label: string;
   display_order: number;
   active: boolean;
+  price_range: string | null;
+  show_in_catalog: boolean;
+  show_in_hero: boolean;
 }
 
 const CATEGORY_OPTIONS: { value: Category; label: string }[] = [
@@ -53,7 +56,7 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 ];
 
 const PAGE_SIZES = [12, 24, 48];
-const EMPTY_FORM = { src: "", alt: "", category: "styling" as Category, label: "Personal Styling", display_order: 0 };
+const EMPTY_FORM = { src: "", alt: "", category: "styling" as Category, label: "Personal Styling", display_order: 0, price_range: "", show_in_catalog: false, show_in_hero: false };
 const inputCls = "w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple bg-white transition-all";
 const labelCls = "block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5";
 
@@ -93,7 +96,7 @@ export default function AdminPortfolioPage() {
   function openNew() { setEditItem(null); setForm(EMPTY_FORM); setError(null); setShowForm(true); }
   function openEdit(item: PortfolioItem) {
     setEditItem(item);
-    setForm({ src: item.src, alt: item.alt, category: item.category, label: item.label, display_order: item.display_order });
+    setForm({ src: item.src, alt: item.alt, category: item.category, label: item.label, display_order: item.display_order, price_range: item.price_range ?? "", show_in_catalog: item.show_in_catalog, show_in_hero: item.show_in_hero });
     setError(null);
     setShowForm(true);
   }
@@ -279,11 +282,17 @@ export default function AdminPortfolioPage() {
                   {CATEGORY_LABELS[item.category]}
                 </span>
               </div>
-              {!item.active && (
-                <div className="absolute top-2 right-2">
+              <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                {!item.active && (
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-900/70 text-white">Hidden</span>
-                </div>
-              )}
+                )}
+                {item.show_in_catalog && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-brand-gold/90 text-white">Catalog</span>
+                )}
+                {item.show_in_hero && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-500/90 text-white">Hero</span>
+                )}
+              </div>
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                 <button onClick={() => openEdit(item)} className="w-9 h-9 bg-white rounded-xl flex items-center justify-center text-gray-700 hover:text-brand-purple shadow-sm transition-colors" title="Edit"><Pencil size={14} /></button>
                 <button onClick={() => toggleActive(item)} className="w-9 h-9 bg-white rounded-xl flex items-center justify-center text-gray-700 hover:text-brand-purple shadow-sm transition-colors" title={item.active ? "Hide" : "Show"}>{item.active ? <EyeOff size={14} /> : <Eye size={14} />}</button>
@@ -309,6 +318,8 @@ export default function AdminPortfolioPage() {
                     {CATEGORY_LABELS[item.category]}
                   </span>
                   {!item.active && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">Hidden</span>}
+                  {item.show_in_catalog && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Catalog</span>}
+                  {item.show_in_hero && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">Hero</span>}
                 </div>
                 <p className="text-sm text-gray-600 truncate">{item.alt}</p>
                 <p className="text-xs text-gray-400 mt-0.5">Order: {item.display_order}</p>
@@ -412,6 +423,63 @@ export default function AdminPortfolioPage() {
                   className="w-32 px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple bg-white transition-all" />
                 <p className="text-xs text-gray-400 mt-1">Lower numbers appear first</p>
               </div>
+
+              {/* ── Catalog & Hero section ── */}
+              <div className="border-t border-gray-100 pt-5">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Visibility Settings</p>
+
+                {/* Show in catalog toggle */}
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 mb-3">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Show in Catalog</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Display this item on the public catalog page</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, show_in_catalog: !f.show_in_catalog }))}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                      form.show_in_catalog ? "bg-brand-purple" : "bg-gray-300"
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
+                      form.show_in_catalog ? "translate-x-6" : "translate-x-1"
+                    }`} />
+                  </button>
+                </div>
+
+                {/* Show in hero toggle */}
+                <div className="flex items-center justify-between p-4 bg-violet-50 rounded-xl border border-violet-100 mb-4">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Feature on Home Page</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Show this design in the hero section on the home page (max 4)</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, show_in_hero: !f.show_in_hero }))}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                      form.show_in_hero ? "bg-violet-600" : "bg-gray-300"
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
+                      form.show_in_hero ? "translate-x-6" : "translate-x-1"
+                    }`} />
+                  </button>
+                </div>
+
+                {/* Price range */}
+                <div>
+                  <label className={labelCls}>Price Range</label>
+                  <input
+                    type="text"
+                    value={form.price_range}
+                    onChange={(e) => setForm((f) => ({ ...f, price_range: e.target.value }))}
+                    placeholder="e.g. R 800 – R 1 500"
+                    className={inputCls}
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Shown on the catalog card (optional)</p>
+                </div>
+              </div>
+
               {error && <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">{error}</div>}
             </div>
             <div className="px-6 py-5 border-t border-gray-100 flex gap-3">

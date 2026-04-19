@@ -10,30 +10,14 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json() as Record<string, unknown>;
-  const updates = { ...body };
-  delete updates.id;
-  delete updates.service_key; // service_key is immutable after creation
-
+  const body = await req.json();
   const db = createServerClient();
-  let { data, error } = await db
-    .from("service_content")
-    .update({ ...updates, updated_at: new Date().toISOString() })
+  const { data, error } = await db
+    .from("portfolio_videos")
+    .update(body)
     .eq("id", params.id)
     .select()
     .single();
-
-  // Migration 006 pending — retry stripping new columns
-  if (error?.message?.includes("display_order") || error?.message?.includes("active")) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { display_order, active, ...safeUpdates } = updates as Record<string, unknown>;
-    ({ data, error } = await db
-      .from("service_content")
-      .update({ ...safeUpdates, updated_at: new Date().toISOString() })
-      .eq("id", params.id)
-      .select()
-      .single());
-  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
@@ -49,7 +33,7 @@ export async function DELETE(
 
   const db = createServerClient();
   const { error } = await db
-    .from("service_content")
+    .from("portfolio_videos")
     .delete()
     .eq("id", params.id);
 

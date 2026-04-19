@@ -5,12 +5,12 @@ import { ContactForm } from "@/components/forms/ContactForm";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Get in touch with Portia Maluleke at Maphoshy Lifestyle via WhatsApp, email, or the contact form.",
+    "Get in touch with Maphoshy Lifestyle via WhatsApp, email, or the contact form.",
 };
 
-const WHATSAPP_NUMBER = "27787513728";
+const WHATSAPP_NUMBER = "27673708546";
 const WHATSAPP_MESSAGE = encodeURIComponent(
-  "Hi Portia! I found you on your website and I'd like to find out more about your services."
+  "Hi! I found you on your website and I'd like to find out more about your services."
 );
 const EMAIL = "info@maphoshylifestyle.co.za";
 const INSTAGRAM_URL = "https://instagram.com/maphoshylifestyle";
@@ -37,7 +37,7 @@ export default function ContactPage() {
           </h1>
           <p className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed">
             Have questions before booking? Want to chat about your style goals?
-            Portia is here for you.
+            We are here for you.
           </p>
           <div className="flex items-center justify-center gap-4 mt-8">
             <div className="h-px w-16 bg-brand-gold/40" />
@@ -57,7 +57,7 @@ export default function ContactPage() {
               <div>
                 <p className="text-brand-gold text-xs font-bold tracking-[0.2em] uppercase mb-2">Reach Out</p>
                 <h2 className="font-heading text-3xl font-bold text-gray-900 mb-7">
-                  How to reach Portia
+                  How to reach us
                 </h2>
 
                 <div className="space-y-3">
@@ -74,7 +74,7 @@ export default function ContactPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-gray-900 text-[15px]">WhatsApp</p>
-                      <p className="text-sm text-gray-400 truncate">Chat directly — quickest way to reach Portia</p>
+                      <p className="text-sm text-gray-400 truncate">Chat directly — the quickest way to reach us</p>
                     </div>
                     <span className="text-[#25D366] font-semibold text-sm shrink-0 group-hover:translate-x-1 transition-transform">
                       Open →
@@ -171,7 +171,7 @@ export default function ContactPage() {
                     <div>
                       <p className="text-sm font-semibold text-gray-900">Turnaround Time</p>
                       <p className="text-sm text-gray-500 mt-0.5 leading-relaxed">
-                        Portia responds within 24 business hours. Custom
+                        We respond within 24 business hours. Custom
                         garments: 2–4 weeks depending on complexity.
                       </p>
                     </div>

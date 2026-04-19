@@ -11,9 +11,12 @@ import {
   MessageCircle,
   CheckCircle2,
 } from "lucide-react";
-import { Hero } from "@/components/sections/Hero";
+import { Hero, type HeroImage } from "@/components/sections/Hero";
 import { ServiceCard } from "@/components/sections/ServiceCard";
 import { TestimonialCard } from "@/components/sections/TestimonialCard";
+import { createPublicServerClient } from "@/lib/supabase";
+
+export const dynamic = "force-dynamic";
 
 const services = [
   {
@@ -34,14 +37,14 @@ const services = [
     icon: ShoppingBag,
     title: "Personal Shopping",
     description:
-      "Let Portia shop for you — or alongside you. She knows exactly where to find the pieces that suit your style, budget and body.",
+      "We shop for you — or alongside you. We know exactly where to find the pieces that suit your style, budget and body.",
     priceIndicator: "From R 600",
   },
   {
     icon: Briefcase,
     title: "Corporate Styling",
     description:
-      "Dress for the position you want. Portia helps professionals build a wardrobe that commands respect and communicates authority.",
+      "Dress for the position you want. We help professionals build a wardrobe that commands respect and communicates authority.",
     priceIndicator: "From R 700",
   },
   {
@@ -60,29 +63,77 @@ const services = [
   },
 ];
 
-const testimonials = [
+const FALLBACK_TESTIMONIALS = [
   {
+    id: "1",
     quote:
-      "Portia transformed the way I see myself. I walked out of our session feeling like a completely different woman — confident, put-together and ready for anything.",
+      "Maphoshy Lifestyle transformed the way I see myself. I walked out of our session feeling like a completely different woman — confident, put-together and ready for anything.",
     author: "Thandeka M.",
     service: "Personal Style Consultation",
     initials: "TM",
   },
   {
+    id: "2",
     quote:
-      "I was sceptical about a personal stylist but Portia just gets it. She listened, she understood my lifestyle and the results were beyond anything I imagined.",
+      "I was sceptical about a personal stylist but they just get it. They listened, they understood my lifestyle and the results were beyond anything I imagined.",
     author: "Nomsa K.",
     service: "Wardrobe Curation",
     initials: "NK",
   },
   {
+    id: "3",
     quote:
-      "The custom dress she made for my daughter's graduation was perfect. Every detail was exactly right. We'll be back for every occasion.",
+      "The custom dress they made for my daughter's graduation was perfect. Every detail was exactly right. We'll be back for every occasion.",
     author: "Grace D.",
     service: "Custom Design",
     initials: "GD",
   },
 ];
+
+async function getHeroImages(): Promise<HeroImage[]> {
+  try {
+    const db = createPublicServerClient();
+    const { data, error } = await db
+      .from("portfolio_items")
+      .select("src, alt, label")
+      .eq("active", true)
+      .eq("show_in_hero", true)
+      .order("display_order", { ascending: true })
+      .limit(4);
+    if (!error && data && data.length === 4) {
+      return data.map(d => ({ src: d.src, alt: d.alt, label: d.label ?? "" }));
+    }
+  } catch { /* fallback to hardcoded */ }
+  return [];
+}
+
+async function getServiceCount(): Promise<number> {
+  try {
+    const db = createPublicServerClient();
+    const { count, error } = await db
+      .from("service_content")
+      .select("id", { count: "exact", head: true })
+      .eq("active", true);
+    if (!error && count != null) return count;
+  } catch { /* fallback */ }
+  return 6;
+}
+
+async function getTestimonials() {
+  try {
+    const db = createPublicServerClient();
+    const { data, error } = await db
+      .from("testimonials")
+      .select("id, quote, author, service, initials")
+      .eq("active", true)
+      .order("display_order", { ascending: true });
+    if (error) console.error("[home] testimonials error:", error.message);
+    if (data && data.length > 0) return data;
+  } catch (err) {
+    console.error("[home] unexpected error:", err);
+  }
+  return FALLBACK_TESTIMONIALS;
+}
 
 const whyUs = [
   "Personalised to your lifestyle and body — no templates",
@@ -91,11 +142,12 @@ const whyUs = [
   "Quality guaranteed on every single service",
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [testimonials, serviceCount, heroImages] = await Promise.all([getTestimonials(), getServiceCount(), getHeroImages()]);
   return (
     <>
       {/* HERO */}
-      <Hero />
+      <Hero serviceCount={serviceCount} heroImages={heroImages} />
 
       {/* ABOUT */}
       <section className="py-24 bg-brand-bg overflow-hidden">
@@ -119,7 +171,7 @@ export default function HomePage() {
               <p className="text-gray-600 text-lg leading-relaxed">
                 Maphoshy Lifestyle is a personal styling and image consultancy
                 founded by{" "}
-                <strong className="text-gray-900">Portia Maluleke</strong>. We
+                <strong className="text-gray-900">Maphoshy Lifestyle</strong>. We
                 believe that when you look good, you feel good — and when you
                 feel good, you show up powerfully in every area of your life.
               </p>
@@ -301,7 +353,7 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {testimonials.map((t) => (
-              <TestimonialCard key={t.author} {...t} />
+              <TestimonialCard key={t.id} {...t} />
             ))}
           </div>
         </div>
@@ -326,7 +378,7 @@ export default function HomePage() {
             Ready to transform<br className="hidden sm:block" /> your style?
           </h2>
           <p className="text-white/60 text-base md:text-lg mb-12 max-w-xl mx-auto leading-relaxed">
-            Book a consultation today and let Portia guide you towards a look
+            Book a consultation today and let us guide you towards a look
             that&apos;s confident, intentional and uniquely yours.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -337,7 +389,7 @@ export default function HomePage() {
               Book a Consult
             </Link>
             <a
-              href={`https://wa.me/27787513728?text=${encodeURIComponent("Hi Portia! I found you on your website and I'd like to find out more about your services.")}`}
+              href={`https://wa.me/27673708546?text=${encodeURIComponent("Hi! I found you on your website and I'd like to find out more about your services.")}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-full border border-white/25 hover:bg-white/20 transition-all text-base"

@@ -6,7 +6,7 @@ import { Shield, Clock, CreditCard, CalendarCheck } from "lucide-react";
 export const metadata: Metadata = {
   title: "Book a Consult",
   description:
-    "Book your personal styling consultation with Portia Maluleke at Maphoshy Lifestyle.",
+    "Book your personal styling consultation with Maphoshy Lifestyle.",
 };
 
 function BookingFormFallback() {
@@ -46,7 +46,7 @@ export default function BookPage() {
           </h1>
           <p className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed">
             Complete the form below and pay your consultation fee to lock in
-            your booking. Portia will reach out within 24 hours to confirm.
+            your booking. We will reach out within 24 hours to confirm.
           </p>
           <div className="flex items-center justify-center gap-4 mt-8">
             <div className="h-px w-16 bg-brand-gold/40" />
@@ -85,14 +85,14 @@ export default function BookPage() {
                     {
                       icon: Shield,
                       title: "Secure your slot",
-                      body: "Your payment reserves Portia's time specifically for you.",
+                      body: "Your payment reserves our time specifically for you.",
                       color: "rgba(92,26,140,0.1)",
                       iconColor: "text-brand-purple",
                     },
                     {
                       icon: Clock,
                       title: "Confirmation within 24 hours",
-                      body: "Portia will personally reach out to confirm your session details.",
+                      body: "We will personally reach out to confirm your session details.",
                       color: "rgba(201,150,74,0.12)",
                       iconColor: "text-brand-gold",
                     },
@@ -136,7 +136,7 @@ export default function BookPage() {
                 style={{ background: "linear-gradient(135deg, rgba(92,26,140,0.06), rgba(92,26,140,0.02))", border: "1px solid rgba(92,26,140,0.10)" }}>
                 <p className="text-xs text-gray-500 leading-relaxed">
                   <span className="font-semibold text-brand-purple">200+ clients styled</span> and counting.
-                  Portia has a 5-star record of delivering transformations that last.
+                  We have a 5-star record of delivering transformations that last.
                 </p>
               </div>
             </div>

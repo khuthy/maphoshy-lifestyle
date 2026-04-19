@@ -2,15 +2,16 @@ import Link from "next/link";
 import { MessageCircle, Mail } from "lucide-react";
 import { BrandMark } from "@/components/layout/BrandMark";
 
-const WHATSAPP_NUMBER = "27787513728";
+const WHATSAPP_NUMBER = "27673708546";
 const WHATSAPP_MESSAGE = encodeURIComponent(
-  "Hi Portia! I found you on your website and I'd like to find out more about your services."
+  "Hi! I found you on your website and I'd like to find out more about your services."
 );
 const INSTAGRAM_URL = "https://instagram.com/maphoshylifestyle";
 const TIKTOK_URL = "https://tiktok.com/@maphoshylifestyle";
 const EMAIL = "info@maphoshylifestyle.co.za";
 
 const footerLinks = [
+  { href: "/catalog", label: "Catalog" },
   { href: "/portfolio", label: "Portfolio" },
   { href: "/services", label: "Services" },
   { href: "/pricing", label: "Pricing" },
@@ -26,7 +27,7 @@ export function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <p className="font-heading text-2xl font-bold text-white">Ready to transform your look?</p>
-            <p className="text-white/60 text-sm mt-1">Book a session with Portia — spots fill quickly.</p>
+            <p className="text-white/60 text-sm mt-1">Book a session with us — spots fill quickly.</p>
           </div>
           <Link
             href="/book"
@@ -125,7 +126,7 @@ export function Footer() {
           <p className="text-gray-600 text-sm">
             © {new Date().getFullYear()} Maphoshy Lifestyle. All rights reserved.
           </p>
-          <p className="text-gray-700 text-xs">Owned by Portia Maluleke</p>
+          <p className="text-gray-700 text-xs">Maphoshy Lifestyle</p>
         </div>
       </div>
     </footer>

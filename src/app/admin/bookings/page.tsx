@@ -370,7 +370,7 @@ export default function AdminBookingsPage() {
                   placeholder={`Hi ${selectedBooking.client_name},\n\nThank you for your booking…`}
                 />
                 <p className="text-xs text-gray-400 mt-1.5">
-                  This will be sent as a professional branded email from Portia.
+                  This will be sent as a professional branded email from Maphoshy Lifestyle.
                 </p>
               </div>
             </div>

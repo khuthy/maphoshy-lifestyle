@@ -86,7 +86,7 @@ export function BrandMark({ theme = "dark", size = "sm" }: BrandMarkProps) {
           ${tagCls}
         `}
       >
-        Quality is our priority | Service is our passion
+        Quality at your service
       </span>
 
     </div>

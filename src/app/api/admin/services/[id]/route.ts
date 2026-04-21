@@ -23,10 +23,12 @@ export async function PUT(
     .select()
     .single();
 
-  // Migration 006 pending — retry stripping new columns
-  if (error?.message?.includes("display_order") || error?.message?.includes("active")) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { display_order, active, ...safeUpdates } = updates as Record<string, unknown>;
+  // Retry stripping columns added by later migrations if they don't exist yet
+  const optionalCols = ["display_order", "active", "price_video_call", "price_in_person"];
+  if (optionalCols.some(col => error?.message?.includes(col))) {
+    const safeUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([k]) => !optionalCols.includes(k))
+    );
     ({ data, error } = await db
       .from("service_content")
       .update({ ...safeUpdates, updated_at: new Date().toISOString() })

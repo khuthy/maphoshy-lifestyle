@@ -15,6 +15,8 @@ interface ServiceContent {
   description: string;
   includes: string[];
   price_from: string;
+  price_video_call?: string | null;
+  price_in_person?: string | null;
   booking_key: string;
   icon_name: string;
   display_order: number;
@@ -37,7 +39,8 @@ const ICON_MAP: Record<string, any> = {
 
 const EMPTY_FORM = {
   title: "", service_key: "", description: "", includes: [] as string[],
-  price_from: "", booking_key: "", icon_name: "Sparkles", display_order: 0,
+  price_from: "", price_video_call: "", price_in_person: "",
+  booking_key: "", icon_name: "Sparkles", display_order: 0,
 };
 
 const PAGE_SIZES = [4, 8, 12];
@@ -113,7 +116,7 @@ export default function AdminServicesPage() {
   }
   function openEdit(s: ServiceContent) {
     setEditItem(s);
-    setForm({ title: s.title, service_key: s.service_key, description: s.description, includes: [...s.includes], price_from: s.price_from, booking_key: s.booking_key, icon_name: s.icon_name, display_order: s.display_order ?? 0 });
+    setForm({ title: s.title, service_key: s.service_key, description: s.description, includes: [...s.includes], price_from: s.price_from, price_video_call: s.price_video_call ?? "", price_in_person: s.price_in_person ?? "", booking_key: s.booking_key, icon_name: s.icon_name, display_order: s.display_order ?? 0 });
     setFormError(null); setShowForm(true);
   }
   function closeForm() { setShowForm(false); setEditItem(null); }
@@ -348,6 +351,22 @@ export default function AdminServicesPage() {
                 <div>
                   <label className={labelCls}>Price From</label>
                   <input className={inputCls} placeholder="e.g. R 500" value={form.price_from} onChange={e => setForm(f => ({ ...f, price_from: e.target.value }))} />
+                </div>
+                <div className="col-span-2 rounded-xl border border-gray-200 p-4 space-y-3 bg-gray-50">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Session Format Prices</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Only needed when this service offers both video call and in-person at different rates. Leave blank to use the main price above.</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={labelCls}>Video Call Price</label>
+                      <input className={inputCls} placeholder="e.g. R 350" value={form.price_video_call} onChange={e => setForm(f => ({ ...f, price_video_call: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className={labelCls}>In-Person Price</label>
+                      <input className={inputCls} placeholder="e.g. R 500" value={form.price_in_person} onChange={e => setForm(f => ({ ...f, price_in_person: e.target.value }))} />
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label className={labelCls}>Display Order</label>

@@ -29,12 +29,12 @@ async function getBookingServices(): Promise<BookingServiceOption[]> {
     const db = createPublicServerClient();
     const { data, error } = await db
       .from("service_content")
-      .select("service_key, title, price_from, active, display_order")
+      .select("service_key, title, price_from, price_video_call, price_in_person, active, display_order")
       .eq("active", true)
       .order("display_order", { ascending: true });
 
     if (error) {
-      // Fallback if display_order column not yet migrated
+      // Fallback if optional columns not yet migrated
       const { data: fallback, error: fe } = await db
         .from("service_content")
         .select("service_key, title, price_from, active")
@@ -55,6 +55,8 @@ async function getBookingServices(): Promise<BookingServiceOption[]> {
         service_key: s.service_key as string,
         title: s.title as string,
         price_from: s.price_from as string | number | null,
+        price_video_call: s.price_video_call as string | null,
+        price_in_person: s.price_in_person as string | null,
       }));
     }
   } catch {

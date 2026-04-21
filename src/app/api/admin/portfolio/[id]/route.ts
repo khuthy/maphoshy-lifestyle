@@ -23,8 +23,9 @@ export async function PUT(
 
   // If optional columns don't exist yet (migrations pending), retry without them
   if (error?.message?.includes("price_range") || error?.message?.includes("show_in_catalog") || error?.message?.includes("show_in_hero")) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { price_range, show_in_catalog, show_in_hero, ...safeBody } = body;
+    const safeBody = Object.fromEntries(
+      Object.entries(body).filter(([k]) => !["price_range", "show_in_catalog", "show_in_hero"].includes(k))
+    );
     ({ data, error } = await db
       .from("portfolio_items")
       .update(safeBody)

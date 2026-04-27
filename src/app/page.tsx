@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Hero, type HeroImage } from "@/components/sections/Hero";
 import { ServiceCard } from "@/components/sections/ServiceCard";
-import { TestimonialCard } from "@/components/sections/TestimonialCard";
+import { TestimonialsCarousel } from "@/components/sections/TestimonialsCarousel";
 import { TestimonialSubmitForm } from "@/components/sections/TestimonialSubmitForm";
 import { createPublicServerClient } from "@/lib/supabase";
 
@@ -365,10 +365,8 @@ export default async function HomePage() {
               What Our Clients Say
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <TestimonialCard key={t.id} {...t} />
-            ))}
+          <div className="max-w-3xl mx-auto">
+            <TestimonialsCarousel testimonials={testimonials} />
           </div>
 
           {/* ── Submit your own review ── */}

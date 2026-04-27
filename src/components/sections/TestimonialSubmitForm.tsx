@@ -5,7 +5,7 @@ import { Send, CheckCircle } from "lucide-react";
 
 const inputCls = "w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent text-gray-900 placeholder:text-gray-400 text-sm bg-white transition-all";
 
-export function TestimonialSubmitForm() {
+export function TestimonialSubmitForm({ services }: { services: string[] }) {
   const [form, setForm] = useState({ author: "", service: "", quote: "" });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -65,12 +65,16 @@ export function TestimonialSubmitForm() {
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
             Service You Used
           </label>
-          <input
+          <select
             value={form.service}
             onChange={e => setForm(f => ({ ...f, service: e.target.value }))}
-            placeholder="e.g. Wardrobe Curation"
             className={inputCls}
-          />
+          >
+            <option value="">Select a service…</option>
+            {services.map(title => (
+              <option key={title} value={title}>{title}</option>
+            ))}
+          </select>
         </div>
       </div>
 

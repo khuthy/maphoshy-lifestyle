@@ -33,6 +33,7 @@ function expiryLabel(t: Testimonial) {
 
 export default function AdminTestimonialsPage() {
   const [items, setItems] = useState<Testimonial[]>([]);
+  const [serviceTitles, setServiceTitles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editItem, setEditItem] = useState<Testimonial | null>(null);
@@ -42,8 +43,15 @@ export default function AdminTestimonialsPage() {
 
   async function load() {
     setLoading(true);
-    const res = await fetch("/api/admin/testimonials");
-    if (res.ok) setItems(await res.json());
+    const [tRes, sRes] = await Promise.all([
+      fetch("/api/admin/testimonials"),
+      fetch("/api/admin/services"),
+    ]);
+    if (tRes.ok) setItems(await tRes.json());
+    if (sRes.ok) {
+      const svcs = await sRes.json();
+      setServiceTitles(svcs.map((s: { title: string }) => s.title));
+    }
     setLoading(false);
   }
 
@@ -264,7 +272,12 @@ export default function AdminTestimonialsPage() {
               </div>
               <div>
                 <label className={labelCls}>Service Used</label>
-                <input type="text" value={form.service} onChange={(e) => setForm((f) => ({ ...f, service: e.target.value }))} placeholder="Personal Style Consultation" className={inputCls} />
+                <select value={form.service} onChange={(e) => setForm((f) => ({ ...f, service: e.target.value }))} className={inputCls}>
+                  <option value="">Select a service…</option>
+                  {serviceTitles.map(title => (
+                    <option key={title} value={title}>{title}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className={labelCls}>Display Order</label>

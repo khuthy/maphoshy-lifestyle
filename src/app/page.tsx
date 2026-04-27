@@ -120,6 +120,19 @@ async function getServiceCount(): Promise<number> {
   return 6;
 }
 
+async function getServiceTitles(): Promise<string[]> {
+  try {
+    const db = createPublicServerClient();
+    const { data, error } = await db
+      .from("service_content")
+      .select("title, display_order")
+      .eq("active", true)
+      .order("display_order", { ascending: true });
+    if (!error && data && data.length > 0) return data.map(s => s.title as string);
+  } catch { /* fallback to empty */ }
+  return [];
+}
+
 async function getTestimonials() {
   try {
     const db = createPublicServerClient();
@@ -144,7 +157,7 @@ const whyUs = [
 ];
 
 export default async function HomePage() {
-  const [testimonials, serviceCount, heroImages] = await Promise.all([getTestimonials(), getServiceCount(), getHeroImages()]);
+  const [testimonials, serviceCount, heroImages, serviceTitles] = await Promise.all([getTestimonials(), getServiceCount(), getHeroImages(), getServiceTitles()]);
   return (
     <>
       {/* HERO */}
@@ -370,7 +383,7 @@ export default async function HomePage() {
                 Your review will appear on the site after a quick approval.
               </p>
             </div>
-            <TestimonialSubmitForm />
+            <TestimonialSubmitForm services={serviceTitles} />
           </div>
         </div>
       </section>

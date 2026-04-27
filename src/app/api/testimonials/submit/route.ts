@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createPublicServerClient } from "@/lib/supabase";
+import { createServerClient } from "@/lib/supabase";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Please write at least a sentence about your experience" }, { status: 400 });
   }
 
-  const db = createPublicServerClient();
+  const db = createServerClient();
   const initials = author.trim().split(/\s+/).map((w: string) => w[0].toUpperCase()).slice(0, 2).join("");
 
   const { error } = await db

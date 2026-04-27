@@ -14,6 +14,7 @@ import {
 import { Hero, type HeroImage } from "@/components/sections/Hero";
 import { ServiceCard } from "@/components/sections/ServiceCard";
 import { TestimonialCard } from "@/components/sections/TestimonialCard";
+import { TestimonialSubmitForm } from "@/components/sections/TestimonialSubmitForm";
 import { createPublicServerClient } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -355,6 +356,21 @@ export default async function HomePage() {
             {testimonials.map((t) => (
               <TestimonialCard key={t.id} {...t} />
             ))}
+          </div>
+
+          {/* ── Submit your own review ── */}
+          <div className="mt-16 bg-white rounded-3xl border border-gray-100 shadow-sm p-8 md:p-10 max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <p className="text-brand-gold text-xs font-semibold tracking-[0.3em] uppercase mb-3">Share Your Experience</p>
+              <h3 className="font-heading text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                Leave a Review
+              </h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Had a styling session with us? We&apos;d love to hear about your transformation.
+                Your review will appear on the site after a quick approval.
+              </p>
+            </div>
+            <TestimonialSubmitForm />
           </div>
         </div>
       </section>

@@ -2,7 +2,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 
-export function Hero() {
+export interface HeroImage { src: string; alt: string; label?: string; }
+
+const FALLBACK_IMAGES: HeroImage[] = [
+  { src: "/assets/image00003.jpeg", alt: "Maphoshy Lifestyle — personal styling",   label: "Styling"   },
+  { src: "/assets/image00007.jpeg", alt: "Maphoshy Lifestyle — event styling",      label: ""          },
+  { src: "/assets/image00011.jpeg", alt: "Maphoshy Lifestyle — custom garment",     label: ""          },
+  { src: "/assets/image00021.jpeg", alt: "Maphoshy Lifestyle — corporate styling",  label: "Corporate" },
+];
+
+export function Hero({ serviceCount = 6, heroImages }: { serviceCount?: number; heroImages?: HeroImage[] }) {
+  const imgs = (heroImages && heroImages.length === 4) ? heroImages : FALLBACK_IMAGES;
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
 
@@ -203,7 +213,7 @@ export function Hero() {
               {[
                 { value: "200+", label: "Clients styled" },
                 { value: "5★",   label: "Client rating" },
-                { value: "6",    label: "Services" },
+                { value: `${serviceCount}`, label: "Services" },
               ].map((stat) => (
                 <div key={stat.label}
                   className="flex items-center gap-2.5 px-4 py-2 rounded-full"
@@ -224,48 +234,34 @@ export function Hero() {
 
             {/* ── Card 1: Large left, tall ── */}
             <div className="absolute left-0 top-8 w-[215px] h-[350px] rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.6)]"
-              style={{
-                border: "1px solid rgba(201,150,74,0.35)",
-                "--rot": "-1.5deg",
-                animation: "cardFloat 7s ease-in-out infinite",
-              } as React.CSSProperties}>
-              <Image src="/assets/image00003.jpeg" alt="Maphoshy Lifestyle — personal styling" fill className="object-cover" sizes="215px" />
+              style={{ border: "1px solid rgba(201,150,74,0.35)", "--rot": "-1.5deg", animation: "cardFloat 7s ease-in-out infinite" } as React.CSSProperties}>
+              <Image src={imgs[0].src} alt={imgs[0].alt} fill className="object-cover" sizes="215px" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 55%, rgba(6,0,17,0.75) 100%)" }} />
-              <div className="absolute bottom-4 left-4">
-                <span className="text-[10px] font-semibold text-white/80 uppercase tracking-widest">Styling</span>
-              </div>
+              {imgs[0].label && (
+                <div className="absolute bottom-4 left-4">
+                  <span className="text-[10px] font-semibold text-white/80 uppercase tracking-widest">{imgs[0].label}</span>
+                </div>
+              )}
             </div>
 
             {/* ── Card 2: Top centre-right ── */}
             <div className="absolute left-[205px] top-0 w-[175px] h-[255px] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.55)]"
-              style={{
-                border: "1px solid rgba(255,255,255,0.10)",
-                "--rot": "1.2deg",
-                animation: "cardFloat2 8s ease-in-out infinite 0.8s",
-              } as React.CSSProperties}>
-              <Image src="/assets/image00007.jpeg" alt="Maphoshy Lifestyle — event styling" fill className="object-cover" sizes="175px" />
+              style={{ border: "1px solid rgba(255,255,255,0.10)", "--rot": "1.2deg", animation: "cardFloat2 8s ease-in-out infinite 0.8s" } as React.CSSProperties}>
+              <Image src={imgs[1].src} alt={imgs[1].alt} fill className="object-cover" sizes="175px" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 55%, rgba(6,0,17,0.65) 100%)" }} />
             </div>
 
             {/* ── Card 3: Far right, mid height ── */}
             <div className="absolute right-0 top-[60px] w-[185px] h-[290px] rounded-2xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.58)]"
-              style={{
-                border: "1px solid rgba(201,150,74,0.20)",
-                "--rot": "2deg",
-                animation: "cardFloat 6s ease-in-out infinite 1.6s",
-              } as React.CSSProperties}>
-              <Image src="/assets/image00011.jpeg" alt="Maphoshy Lifestyle — custom garment" fill className="object-cover" sizes="185px" />
+              style={{ border: "1px solid rgba(201,150,74,0.20)", "--rot": "2deg", animation: "cardFloat 6s ease-in-out infinite 1.6s" } as React.CSSProperties}>
+              <Image src={imgs[2].src} alt={imgs[2].alt} fill className="object-cover" sizes="185px" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 55%, rgba(6,0,17,0.65) 100%)" }} />
             </div>
 
             {/* ── Card 4: Bottom, overlapping cards 1+2 ── */}
             <div className="absolute left-[175px] bottom-0 w-[210px] h-[270px] rounded-2xl overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.60)]"
-              style={{
-                border: "1px solid rgba(255,255,255,0.08)",
-                "--rot": "-0.8deg",
-                animation: "cardFloat2 9s ease-in-out infinite 2.2s",
-              } as React.CSSProperties}>
-              <Image src="/assets/image00021.jpeg" alt="Maphoshy Lifestyle — corporate styling" fill className="object-cover" sizes="210px" />
+              style={{ border: "1px solid rgba(255,255,255,0.08)", "--rot": "-0.8deg", animation: "cardFloat2 9s ease-in-out infinite 2.2s" } as React.CSSProperties}>
+              <Image src={imgs[3].src} alt={imgs[3].alt} fill className="object-cover" sizes="210px" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 55%, rgba(6,0,17,0.70) 100%)" }} />
               <div className="absolute bottom-4 left-4">
                 <span className="text-[10px] font-semibold text-white/80 uppercase tracking-widest">Corporate</span>

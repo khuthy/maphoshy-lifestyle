@@ -47,6 +47,8 @@ export interface BookingServiceOption {
   service_key: string;
   title: string;
   price_from: string | number | null;
+  price_video_call?: string | number | null;
+  price_in_person?: string | number | null;
 }
 
 function parsePrice(value: string | number | null | undefined): number {
@@ -128,6 +130,7 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
   });
 
   const serviceType = watch("serviceType");
+  const sessionFormat = watch("sessionFormat");
   const selectedStyleWords = watch("styleWords") ?? [];
 
   // Update service when URL param changes
@@ -139,7 +142,14 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, setValue]);
 
-  const price = servicePrices[serviceType] ?? 0;
+  // Use format-specific price when the client picks video call or in-person
+  const currentService = services.find(s => s.service_key === serviceType);
+  const price =
+    sessionFormat === "video_call" && currentService?.price_video_call
+      ? parsePrice(currentService.price_video_call)
+      : sessionFormat === "in_person" && currentService?.price_in_person
+      ? parsePrice(currentService.price_in_person)
+      : servicePrices[serviceType] ?? 0;
 
   const isCustomGarment = serviceType === "custom_garment";
   const isAlteration = serviceType === "alteration";

@@ -11,9 +11,10 @@ import {
   MessageCircle,
   CheckCircle2,
 } from "lucide-react";
-import { Hero } from "@/components/sections/Hero";
+import { Hero, type HeroImage } from "@/components/sections/Hero";
 import { ServiceCard } from "@/components/sections/ServiceCard";
-import { TestimonialCard } from "@/components/sections/TestimonialCard";
+import { TestimonialsCarousel } from "@/components/sections/TestimonialsCarousel";
+import { TestimonialSubmitForm } from "@/components/sections/TestimonialSubmitForm";
 import { createPublicServerClient } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -90,6 +91,48 @@ const FALLBACK_TESTIMONIALS = [
   },
 ];
 
+async function getHeroImages(): Promise<HeroImage[]> {
+  try {
+    const db = createPublicServerClient();
+    const { data, error } = await db
+      .from("portfolio_items")
+      .select("src, alt, label")
+      .eq("active", true)
+      .eq("show_in_hero", true)
+      .order("display_order", { ascending: true })
+      .limit(4);
+    if (!error && data && data.length === 4) {
+      return data.map(d => ({ src: d.src, alt: d.alt, label: d.label ?? "" }));
+    }
+  } catch { /* fallback to hardcoded */ }
+  return [];
+}
+
+async function getServiceCount(): Promise<number> {
+  try {
+    const db = createPublicServerClient();
+    const { count, error } = await db
+      .from("service_content")
+      .select("id", { count: "exact", head: true })
+      .eq("active", true);
+    if (!error && count != null) return count;
+  } catch { /* fallback */ }
+  return 6;
+}
+
+async function getServiceTitles(): Promise<string[]> {
+  try {
+    const db = createPublicServerClient();
+    const { data, error } = await db
+      .from("service_content")
+      .select("title, display_order")
+      .eq("active", true)
+      .order("display_order", { ascending: true });
+    if (!error && data && data.length > 0) return data.map(s => s.title as string);
+  } catch { /* fallback to empty */ }
+  return [];
+}
+
 async function getTestimonials() {
   try {
     const db = createPublicServerClient();
@@ -114,11 +157,11 @@ const whyUs = [
 ];
 
 export default async function HomePage() {
-  const testimonials = await getTestimonials();
+  const [testimonials, serviceCount, heroImages, serviceTitles] = await Promise.all([getTestimonials(), getServiceCount(), getHeroImages(), getServiceTitles()]);
   return (
     <>
       {/* HERO */}
-      <Hero />
+      <Hero serviceCount={serviceCount} heroImages={heroImages} />
 
       {/* ABOUT */}
       <section className="py-24 bg-brand-bg overflow-hidden">
@@ -322,10 +365,23 @@ export default async function HomePage() {
               What Our Clients Say
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <TestimonialCard key={t.id} {...t} />
-            ))}
+          <div className="max-w-3xl mx-auto">
+            <TestimonialsCarousel testimonials={testimonials} />
+          </div>
+
+          {/* ── Submit your own review ── */}
+          <div className="mt-16 bg-white rounded-3xl border border-gray-100 shadow-sm p-8 md:p-10 max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <p className="text-brand-gold text-xs font-semibold tracking-[0.3em] uppercase mb-3">Share Your Experience</p>
+              <h3 className="font-heading text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                Leave a Review
+              </h3>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Had a styling session with us? We&apos;d love to hear about your transformation.
+                Your review will appear on the site after a quick approval.
+              </p>
+            </div>
+            <TestimonialSubmitForm services={serviceTitles} />
           </div>
         </div>
       </section>

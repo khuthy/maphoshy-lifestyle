@@ -30,22 +30,22 @@ export async function POST(req: NextRequest) {
   }
 
   const db = createServerClient();
-  const { price_range, show_in_catalog } = body;
+  const { price_range, show_in_catalog, show_in_hero } = body;
 
-  // Attempt insert with catalog fields (available after migration)
+  // Attempt insert with all optional fields (available after migrations)
   let { data, error } = await db
     .from("portfolio_items")
-    .insert({ src, alt, category, label, display_order: display_order ?? 0, price_range: price_range ?? null, show_in_catalog: show_in_catalog ?? false })
+    .insert({ src, alt, category, label, display_order: display_order ?? 0, price_range: price_range ?? null, show_in_catalog: show_in_catalog ?? false, show_in_hero: show_in_hero ?? false })
     .select()
     .single();
 
-  // If catalog columns don't exist yet (migration pending), retry without them
-  if (error?.message?.includes("price_range") || error?.message?.includes("show_in_catalog")) {
-    ({ data, error } = await db
-      .from("portfolio_items")
-      .insert({ src, alt, category, label, display_order: display_order ?? 0 })
-      .select()
-      .single());
+  // Only strip the specific column(s) missing from the schema — preserve others
+  const optionalCols = ["price_range", "show_in_catalog", "show_in_hero"];
+  if (optionalCols.some(col => error?.message?.includes(col))) {
+    const missing = optionalCols.filter(col => error?.message?.includes(col));
+    const full = { src, alt, category, label, display_order: display_order ?? 0, price_range: price_range ?? null, show_in_catalog: show_in_catalog ?? false, show_in_hero: show_in_hero ?? false };
+    const safeInsert = Object.fromEntries(Object.entries(full).filter(([k]) => !missing.includes(k)));
+    ({ data, error } = await db.from("portfolio_items").insert(safeInsert).select().single());
   }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

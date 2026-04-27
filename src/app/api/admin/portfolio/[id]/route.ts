@@ -21,10 +21,12 @@ export async function PUT(
     .select()
     .single();
 
-  // If optional columns don't exist yet (migrations pending), retry without them
-  if (error?.message?.includes("price_range") || error?.message?.includes("show_in_catalog") || error?.message?.includes("show_in_hero")) {
+  // If a column doesn't exist yet (migration pending), retry without ONLY that column
+  const optionalCols = ["price_range", "show_in_catalog", "show_in_hero"];
+  if (optionalCols.some(col => error?.message?.includes(col))) {
+    const missing = optionalCols.filter(col => error?.message?.includes(col));
     const safeBody = Object.fromEntries(
-      Object.entries(body).filter(([k]) => !["price_range", "show_in_catalog", "show_in_hero"].includes(k))
+      Object.entries(body).filter(([k]) => !missing.includes(k))
     );
     ({ data, error } = await db
       .from("portfolio_items")

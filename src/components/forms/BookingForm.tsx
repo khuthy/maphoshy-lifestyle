@@ -157,8 +157,6 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
 
   const isCustomGarment = serviceType === "custom_garment";
   const isAlteration = serviceType === "alteration";
-  const isStyleDiscovery = serviceType === "style_discovery";
-  const showFileUpload = isCustomGarment || isAlteration;
 
   // File upload handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -232,10 +230,8 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
         formData.append("sessionFormat", data.sessionFormat);
       }
 
-      if (isStyleDiscovery) {
-        serviceDetails.lifestyleContext = data.lifestyleContext;
-        serviceDetails.styleWords = data.styleWords;
-      }
+      if (data.lifestyleContext) serviceDetails.lifestyleContext = data.lifestyleContext;
+      if (data.styleWords?.length) serviceDetails.styleWords = data.styleWords;
 
       formData.append("serviceDetails", JSON.stringify(serviceDetails));
 
@@ -512,11 +508,10 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
         </div>
       )}
 
-      {/* ── Section 3c: Style Discovery fields ── */}
-      {isStyleDiscovery && (
-        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 space-y-5">
+      {/* ── Section 3c: Style context (all services) ── */}
+      <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 space-y-5">
           <h2 className="font-heading text-xl font-semibold text-gray-900">
-            Tell Us About Yourself
+            Tell Us About Yourself <span className="text-sm font-normal text-gray-400">(Optional)</span>
           </h2>
 
           <Field
@@ -558,17 +553,16 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
           </Field>
 
         </div>
-      )}
+      </div>
 
-      {/* ── Section 4: Reference image upload ── */}
-      {showFileUpload && (
-        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 space-y-4">
+      {/* ── Section 4: Reference image upload (all services) ── */}
+      <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 space-y-4">
           <h2 className="font-heading text-xl font-semibold text-gray-900">
             Reference Images{" "}
             <span className="text-sm font-normal text-gray-400">(Optional)</span>
           </h2>
           <p className="text-sm text-gray-600">
-            Upload up to 5 reference images. JPG or PNG only, max 5MB each.
+            Upload inspiration images, garments to be altered, or anything that helps us understand your vision. JPG or PNG only, max 5MB each.
           </p>
 
           <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-brand-purple hover:bg-brand-light-purple/30 transition-all">
@@ -616,7 +610,7 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
             </ul>
           )}
         </div>
-      )}
+      </div>
 
       {/* ── Error message ── */}
       {submitError && (

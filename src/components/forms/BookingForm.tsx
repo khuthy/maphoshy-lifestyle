@@ -92,6 +92,8 @@ function Field({
 const inputCls =
   "w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent text-gray-900 placeholder:text-gray-400 text-sm transition-all bg-white";
 
+const CONSULTATION_FEE = 500;
+
 // ── Main component ───────────────────────────────────────────────────────
 export function BookingForm({ services }: { services: BookingServiceOption[] }) {
   const searchParams = useSearchParams();
@@ -142,14 +144,16 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, setValue]);
 
-  // Use format-specific price when the client picks video call or in-person
   const currentService = services.find(s => s.service_key === serviceType);
-  const price =
+  const servicePrice =
     sessionFormat === "video_call" && currentService?.price_video_call
       ? parsePrice(currentService.price_video_call)
       : sessionFormat === "in_person" && currentService?.price_in_person
       ? parsePrice(currentService.price_in_person)
       : servicePrices[serviceType] ?? 0;
+  // Deposit = R500 consultation fee + 50% of service price
+  const serviceDeposit = Math.round(servicePrice * 0.5);
+  const totalDeposit = CONSULTATION_FEE + serviceDeposit;
 
   const isCustomGarment = serviceType === "custom_garment";
   const isAlteration = serviceType === "alteration";
@@ -196,7 +200,7 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
       formData.append("clientPhone", data.clientPhone);
       formData.append("serviceType", data.serviceType);
       formData.append("preferredDate", data.preferredDate);
-      formData.append("amount", String(price));
+      formData.append("amount", String(totalDeposit));
       if (data.notes) formData.append("notes", data.notes);
 
       // Service-specific fields
@@ -223,12 +227,14 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
         serviceDetails.desiredMeasurements = data.desiredMeasurements;
       }
 
+      if (data.sessionFormat) {
+        serviceDetails.sessionFormat = data.sessionFormat;
+        formData.append("sessionFormat", data.sessionFormat);
+      }
+
       if (isStyleDiscovery) {
         serviceDetails.lifestyleContext = data.lifestyleContext;
         serviceDetails.styleWords = data.styleWords;
-        serviceDetails.sessionFormat = data.sessionFormat;
-        if (data.sessionFormat)
-          formData.append("sessionFormat", data.sessionFormat);
       }
 
       formData.append("serviceDetails", JSON.stringify(serviceDetails));
@@ -335,17 +341,62 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
           </select>
         </Field>
 
-        {/* Price display */}
-        <div className="flex items-center justify-between p-4 rounded-xl bg-brand-light-purple">
-          <div>
-            <p className="text-sm text-gray-600">Consultation / Booking Fee</p>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Paid upfront to secure your booking
+        {/* Session format — applies to all services */}
+        <Field label="Session Format" required error={errors.sessionFormat?.message}>
+          <Controller
+            control={control}
+            name="sessionFormat"
+            render={({ field }) => (
+              <div className="grid grid-cols-2 gap-3">
+                {(
+                  [
+                    { value: "video_call", label: "Video Call", emoji: "💻" },
+                    { value: "in_person", label: "In Person", emoji: "🤝" },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => field.onChange(opt.value)}
+                    className={`p-4 rounded-xl border-2 text-sm font-medium transition-all flex flex-col items-center gap-2 ${
+                      field.value === opt.value
+                        ? "border-brand-purple bg-brand-light-purple text-brand-purple"
+                        : "border-gray-200 text-gray-600 hover:border-brand-purple/50"
+                    }`}
+                  >
+                    <span className="text-2xl">{opt.emoji}</span>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          />
+        </Field>
+
+        {/* Pricing breakdown */}
+        <div className="rounded-xl border border-brand-purple/20 bg-brand-light-purple divide-y divide-brand-purple/10">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-gray-700">Consultation fee</p>
+              <p className="text-xs text-gray-500">Fixed for all services</p>
+            </div>
+            <p className="font-semibold text-gray-900">{formatRand(CONSULTATION_FEE)}</p>
+          </div>
+          <div className="flex items-center justify-between px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-gray-700">50% service deposit</p>
+              <p className="text-xs text-gray-500">Balance due at/after your session</p>
+            </div>
+            <p className="font-semibold text-gray-900">
+              {servicePrice > 0 ? formatRand(serviceDeposit) : "—"}
             </p>
           </div>
-          <p className="font-heading text-2xl font-bold text-brand-purple">
-            {formatRand(price)}
-          </p>
+          <div className="flex items-center justify-between px-4 py-3">
+            <p className="text-sm font-bold text-brand-purple">Total due today</p>
+            <p className="font-heading text-2xl font-bold text-brand-purple">
+              {servicePrice > 0 ? formatRand(totalDeposit) : formatRand(CONSULTATION_FEE)}
+            </p>
+          </div>
         </div>
 
         <Field label="Additional Notes" error={errors.notes?.message}>
@@ -506,40 +557,6 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
             </div>
           </Field>
 
-          <Field
-            label="Session Format"
-            required
-            error={errors.sessionFormat?.message}
-          >
-            <Controller
-              control={control}
-              name="sessionFormat"
-              render={({ field }) => (
-                <div className="grid grid-cols-2 gap-3">
-                  {(
-                    [
-                      { value: "video_call", label: "Video Call", emoji: "💻" },
-                      { value: "in_person", label: "In Person", emoji: "🤝" },
-                    ] as const
-                  ).map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => field.onChange(opt.value)}
-                      className={`p-4 rounded-xl border-2 text-sm font-medium transition-all flex flex-col items-center gap-2 ${
-                        field.value === opt.value
-                          ? "border-brand-purple bg-brand-light-purple text-brand-purple"
-                          : "border-gray-200 text-gray-600 hover:border-brand-purple/50"
-                      }`}
-                    >
-                      <span className="text-2xl">{opt.emoji}</span>
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            />
-          </Field>
         </div>
       )}
 
@@ -611,20 +628,27 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
 
       {/* ── Submit ── */}
       <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
           <div>
             <p className="font-semibold text-gray-900">Booking Summary</p>
             <p className="text-sm text-gray-500 mt-1">
               {serviceLabels[serviceType] ?? serviceType}
+              {sessionFormat ? ` · ${sessionFormat === "video_call" ? "Video Call" : "In Person"}` : ""}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500">Total to pay</p>
+            <p className="text-xs text-gray-500">Due today</p>
             <p className="font-heading text-3xl font-bold text-brand-purple">
-              {formatRand(price)}
+              {servicePrice > 0 ? formatRand(totalDeposit) : formatRand(CONSULTATION_FEE)}
             </p>
           </div>
         </div>
+
+        {servicePrice > 0 && (
+          <p className="text-xs text-gray-500 mb-4">
+            Remaining balance of {formatRand(serviceDeposit)} is due at or after your session.
+          </p>
+        )}
 
         <p className="text-xs text-gray-500 mb-6 leading-relaxed">
           By clicking &quot;Pay &amp; Book&quot; you&apos;ll be redirected to
@@ -645,7 +669,7 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
             </>
           ) : (
             <>
-              Pay &amp; Book — {formatRand(price)}
+              Pay &amp; Book — {servicePrice > 0 ? formatRand(totalDeposit) : formatRand(CONSULTATION_FEE)}
             </>
           )}
         </button>

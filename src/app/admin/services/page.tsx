@@ -349,13 +349,14 @@ export default function AdminServicesPage() {
                   <p className="mt-1 text-xs text-gray-400">Defaults to service key if blank.</p>
                 </div>
                 <div>
-                  <label className={labelCls}>Price From</label>
+                  <label className={labelCls}>Display Price (fallback)</label>
                   <input className={inputCls} placeholder="e.g. R 500" value={form.price_from} onChange={e => setForm(f => ({ ...f, price_from: e.target.value }))} />
+                  <p className="mt-1 text-xs text-gray-400">Shown on the services page. Used if no format prices are set.</p>
                 </div>
-                <div className="col-span-2 rounded-xl border border-gray-200 p-4 space-y-3 bg-gray-50">
+                <div className="col-span-2 rounded-xl border border-brand-purple/20 p-4 space-y-3 bg-brand-light-purple/30">
                   <div>
-                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Session Format Prices</p>
-                    <p className="text-xs text-gray-400 mt-0.5">Only needed when this service offers both video call and in-person at different rates. Leave blank to use the main price above.</p>
+                    <p className="text-xs font-semibold text-brand-purple uppercase tracking-wider">Service Prices (Video Call &amp; In-Person)</p>
+                    <p className="text-xs text-gray-500 mt-0.5">All services offer both formats. The customer pays R500 consultation fee + 50% of this price as their deposit at booking.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>

@@ -365,9 +365,7 @@ export default async function HomePage() {
               What Our Clients Say
             </h2>
           </div>
-          <div className="max-w-3xl mx-auto">
-            <TestimonialsCarousel testimonials={testimonials} />
-          </div>
+          <TestimonialsCarousel testimonials={testimonials} />
 
           {/* ── Submit your own review ── */}
           <div className="mt-16 bg-white rounded-3xl border border-gray-100 shadow-sm p-8 md:p-10 max-w-2xl mx-auto">

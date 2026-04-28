@@ -608,7 +608,6 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
               ))}
             </ul>
           )}
-        </div>
       </div>
 
       {/* ── Error message ── */}

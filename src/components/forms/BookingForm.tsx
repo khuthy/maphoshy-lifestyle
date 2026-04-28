@@ -552,7 +552,6 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
             </div>
           </Field>
 
-        </div>
       </div>
 
       {/* ── Section 4: Reference image upload (all services) ── */}

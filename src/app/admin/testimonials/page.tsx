@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Eye, EyeOff, Pencil, X, Check, Star, Quote, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { AdminHelp } from "@/components/admin/AdminHelp";
 
 interface Testimonial {
   id: string;
@@ -123,6 +124,19 @@ export default function AdminTestimonialsPage() {
 
   return (
     <div className="w-full max-w-full space-y-6">
+      <AdminHelp
+        page="testimonials"
+        heading="Testimonials — How this page works"
+        items={[
+          { title: "Customer submissions", body: "When a customer submits a review on the public site, it lands here under 'Pending Approval'. You must approve it before it shows publicly." },
+          { title: "Approving a review", body: "Click 'Approve' on a pending review to make it live. Approved reviews automatically expire after 90 days (you can re-activate them at any time)." },
+          { title: "Rejecting a review", body: "Click 'Reject' to delete a pending submission without publishing it. This is permanent." },
+          { title: "Adding your own", body: "Click 'Add Review' to manually add a testimonial — useful for reviews you received via WhatsApp or email." },
+          { title: "Show / Hide", body: "Use the Eye icon to hide a review from the public without deleting it. It stays in your list for future use." },
+          { title: "Display order", body: "Edit a testimonial and change the 'Display Order' number. Lower numbers appear first in the carousel on the homepage." },
+        ]}
+      />
+
       {/* ── Page header ── */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>

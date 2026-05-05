@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
+import { AdminHelp } from "@/components/admin/AdminHelp";
 import {
   Plus, Trash2, Eye, EyeOff, Pencil, X, Check, Upload,
   ImageIcon, Search, LayoutGrid, List, ChevronDown, ChevronLeft, ChevronRight, Filter,
 } from "lucide-react";
 
-type Category = "styling" | "custom_garment" | "alteration" | "corporate" | "event";
+type Category = "styling" | "custom_garment" | "alteration" | "corporate" | "event" | "vacation";
 type SortKey = "display_order" | "created_at_asc" | "created_at_desc" | "label";
 type ViewMode = "grid" | "list";
 
@@ -30,6 +31,7 @@ const CATEGORY_OPTIONS: { value: Category; label: string }[] = [
   { value: "alteration",    label: "Alterations"       },
   { value: "corporate",     label: "Corporate"         },
   { value: "event",         label: "Events"            },
+  { value: "vacation",      label: "Vacations"         },
 ];
 
 const CATEGORY_LABELS: Record<Category, string> = {
@@ -38,6 +40,7 @@ const CATEGORY_LABELS: Record<Category, string> = {
   alteration:     "Alterations",
   corporate:      "Corporate",
   event:          "Events",
+  vacation:       "Vacations",
 };
 
 const CATEGORY_COLORS: Record<Category, string> = {
@@ -46,6 +49,7 @@ const CATEGORY_COLORS: Record<Category, string> = {
   alteration:     "bg-amber-100  text-amber-700",
   corporate:      "bg-slate-100  text-slate-700",
   event:          "bg-emerald-100 text-emerald-700",
+  vacation:       "bg-cyan-100   text-cyan-700",
 };
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
@@ -173,6 +177,19 @@ export default function AdminPortfolioPage() {
 
   return (
     <div className="w-full max-w-full overflow-x-hidden">
+      <AdminHelp
+        page="portfolio"
+        heading="Portfolio — How this page works"
+        items={[
+          { title: "Adding a photo", body: "Click 'Add Image', paste the image URL (from your hosting), choose a category and give it a label. Click Save." },
+          { title: "Categories", body: "Use categories to organise your photos: Personal Styling, Custom Garments, Alterations, Corporate, Events, Vacations. Customers can filter by these on the portfolio page." },
+          { title: "Show on catalog", body: "Tick 'Show in Catalog' to make a photo appear in the Style Catalog (the shop-style page). Leave unticked to keep it portfolio-only." },
+          { title: "Show in hero", body: "Tick 'Show in Hero' to use a photo in the rotating banner on the home page. Only the first 4 hero-flagged images are used." },
+          { title: "Display order", body: "Lower number = appears first. Use this to control the order your photos appear on the site." },
+          { title: "Hide a photo", body: "Click the Eye icon to hide a photo from the public without deleting it. Click again to make it visible." },
+        ]}
+      />
+
       {/* ── Page header ── */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>

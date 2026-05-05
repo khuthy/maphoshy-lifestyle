@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminHelp } from "@/components/admin/AdminHelp";
 import {
   Images, Settings, Tag, HelpCircle, ArrowUpRight,
   CalendarCheck, TrendingUp, Clock, CheckCircle, CreditCard,
@@ -81,6 +82,17 @@ export default async function AdminDashboard() {
 
   return (
     <div className="space-y-8">
+      <AdminHelp
+        page="dashboard"
+        heading="Admin Dashboard — Quick Guide"
+        items={[
+          { title: "Bookings", body: "Every time a customer books and pays, they appear here. You can see their name, service, amount paid and contact details. Click a booking to view the full details." },
+          { title: "Pending vs Paid", body: "Pending means the customer started a booking but hasn't completed payment yet. Paid means money has been received and the booking is confirmed." },
+          { title: "Stats at a glance", body: "The cards at the top show total bookings, revenue, pending bookings and recently paid bookings so you can see your business health quickly." },
+          { title: "Navigation", body: "Use the left sidebar to jump between sections: Portfolio (photos), Testimonials (reviews), Services (pricing), FAQs (questions & answers)." },
+          { title: "View public site", body: "Click 'View public site' in the sidebar or top bar to see exactly what your customers see on the live website." },
+        ]}
+      />
 
       {/* ── Header ── */}
       <div>

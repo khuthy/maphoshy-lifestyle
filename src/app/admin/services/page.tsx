@@ -7,6 +7,7 @@ import {
   Star, Scissors, Heart, Palette, Crown, Gem, Wand2,
   Camera, Users, Search, ChevronLeft, ChevronRight,
 } from "lucide-react";
+import { AdminHelp } from "@/components/admin/AdminHelp";
 
 interface ServiceContent {
   id: string;
@@ -14,7 +15,6 @@ interface ServiceContent {
   title: string;
   description: string;
   includes: string[];
-  price_from: string;
   price_video_call?: string | null;
   price_in_person?: string | null;
   booking_key: string;
@@ -39,7 +39,7 @@ const ICON_MAP: Record<string, any> = {
 
 const EMPTY_FORM = {
   title: "", service_key: "", description: "", includes: [] as string[],
-  price_from: "", price_video_call: "", price_in_person: "",
+  price_video_call: "", price_in_person: "",
   booking_key: "", icon_name: "Sparkles", display_order: 0,
 };
 
@@ -96,7 +96,7 @@ export default function AdminServicesPage() {
     if (filterStatus === "hidden")  list = list.filter(s => s.active === false);
 
     if (sortKey === "title") list.sort((a, b) => a.title.localeCompare(b.title));
-    if (sortKey === "price") list.sort((a, b) => parsePrice(a.price_from) - parsePrice(b.price_from));
+    if (sortKey === "price") list.sort((a, b) => parsePrice(a.price_video_call) - parsePrice(b.price_video_call));
 
     return list;
   }, [services, search, filterStatus, sortKey]);
@@ -116,7 +116,7 @@ export default function AdminServicesPage() {
   }
   function openEdit(s: ServiceContent) {
     setEditItem(s);
-    setForm({ title: s.title, service_key: s.service_key, description: s.description, includes: [...s.includes], price_from: s.price_from, price_video_call: s.price_video_call ?? "", price_in_person: s.price_in_person ?? "", booking_key: s.booking_key, icon_name: s.icon_name, display_order: s.display_order ?? 0 });
+    setForm({ title: s.title, service_key: s.service_key, description: s.description, includes: [...s.includes], price_video_call: s.price_video_call ?? "", price_in_person: s.price_in_person ?? "", booking_key: s.booking_key, icon_name: s.icon_name, display_order: s.display_order ?? 0 });
     setFormError(null); setShowForm(true);
   }
   function closeForm() { setShowForm(false); setEditItem(null); }
@@ -151,6 +151,19 @@ export default function AdminServicesPage() {
 
   return (
     <div className="space-y-5">
+      <AdminHelp
+        page="services"
+        heading="Services — How this page works"
+        items={[
+          { title: "What is a service?", body: "Each service is a styling offering you provide — e.g. Personal Style Consultation or Wardrobe Curation. These appear on the public site for customers to book." },
+          { title: "Consultation prices", body: "Each service has a Video Call price and an In-Person price. When a customer books, they pay whichever format they choose. These are the consultation fees." },
+          { title: "Video Call vs In-Person", body: "Video Call means the session happens online via a video platform. In-Person means the customer visits you or you visit them. Set both prices for each service." },
+          { title: "Show / Hide a service", body: "Click the 'Visible' or 'Hidden' button on any service to toggle whether it appears on the public booking page. Hidden services won't be bookable." },
+          { title: "Display order", body: "The number under each service controls the order they appear. Lower numbers show first. Edit a service to change its display order." },
+          { title: "What's Included", body: "The bullet points listed under a service show customers exactly what they get. Add clear, specific inclusions to help customers choose the right service." },
+        ]}
+      />
+
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
@@ -254,7 +267,9 @@ export default function AdminServicesPage() {
                       {!s.active && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">Hidden</span>}
                     </div>
                     <div className="flex flex-wrap gap-1.5 mb-1.5">
-                      <span className="text-xs font-semibold text-brand-gold bg-amber-50 px-2 py-0.5 rounded-full">{s.price_from || "No price set"}</span>
+                      {s.price_video_call && <span className="text-xs font-semibold text-brand-gold bg-amber-50 px-2 py-0.5 rounded-full">💻 {s.price_video_call}</span>}
+                      {s.price_in_person && <span className="text-xs font-semibold text-brand-gold bg-amber-50 px-2 py-0.5 rounded-full">🤝 {s.price_in_person}</span>}
+                      {!s.price_video_call && !s.price_in_person && <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">No prices set</span>}
                       <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-mono">{s.service_key}</span>
                       <span className="text-xs text-gray-300 bg-gray-50 px-2 py-0.5 rounded-full">#{s.display_order ?? 0}</span>
                     </div>
@@ -348,23 +363,18 @@ export default function AdminServicesPage() {
                   <input className={inputCls} placeholder="e.g. consultation" value={form.booking_key} onChange={e => setForm(f => ({ ...f, booking_key: e.target.value }))} />
                   <p className="mt-1 text-xs text-gray-400">Defaults to service key if blank.</p>
                 </div>
-                <div>
-                  <label className={labelCls}>Display Price (fallback)</label>
-                  <input className={inputCls} placeholder="e.g. R 500" value={form.price_from} onChange={e => setForm(f => ({ ...f, price_from: e.target.value }))} />
-                  <p className="mt-1 text-xs text-gray-400">Shown on the services page. Used if no format prices are set.</p>
-                </div>
                 <div className="col-span-2 rounded-xl border border-brand-purple/20 p-4 space-y-3 bg-brand-light-purple/30">
                   <div>
-                    <p className="text-xs font-semibold text-brand-purple uppercase tracking-wider">Service Prices (Video Call &amp; In-Person)</p>
-                    <p className="text-xs text-gray-500 mt-0.5">All services offer both formats. The customer pays R500 consultation fee + 50% of this price as their deposit at booking.</p>
+                    <p className="text-xs font-semibold text-brand-purple uppercase tracking-wider">Consultation Prices</p>
+                    <p className="text-xs text-gray-500 mt-0.5">This is what the customer pays at booking — set both formats. These are the consultation fees.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className={labelCls}>Video Call Price</label>
+                      <label className={labelCls}>Video Call 💻</label>
                       <input className={inputCls} placeholder="e.g. R 350" value={form.price_video_call} onChange={e => setForm(f => ({ ...f, price_video_call: e.target.value }))} />
                     </div>
                     <div>
-                      <label className={labelCls}>In-Person Price</label>
+                      <label className={labelCls}>In-Person 🤝</label>
                       <input className={inputCls} placeholder="e.g. R 500" value={form.price_in_person} onChange={e => setForm(f => ({ ...f, price_in_person: e.target.value }))} />
                     </div>
                   </div>

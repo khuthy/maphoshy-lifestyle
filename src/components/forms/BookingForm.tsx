@@ -92,8 +92,6 @@ function Field({
 const inputCls =
   "w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-purple focus:border-transparent text-gray-900 placeholder:text-gray-400 text-sm transition-all bg-white";
 
-const CONSULTATION_FEE = 500;
-
 // ── Main component ───────────────────────────────────────────────────────
 export function BookingForm({ services }: { services: BookingServiceOption[] }) {
   const searchParams = useSearchParams();
@@ -105,9 +103,6 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
   // Build lookup maps from the dynamic services list
   const serviceLabels: Record<string, string> = Object.fromEntries(
     services.map((s) => [s.service_key, s.title])
-  );
-  const servicePrices: Record<string, number> = Object.fromEntries(
-    services.map((s) => [s.service_key, parsePrice(s.price_from)])
   );
   const serviceOptions = services.map((s) => ({ value: s.service_key, label: s.title }));
 
@@ -145,15 +140,13 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
   }, [searchParams, setValue]);
 
   const currentService = services.find(s => s.service_key === serviceType);
-  const servicePrice =
+  // Price = the selected session format's consultation fee
+  const consultationFee =
     sessionFormat === "video_call" && currentService?.price_video_call
       ? parsePrice(currentService.price_video_call)
       : sessionFormat === "in_person" && currentService?.price_in_person
       ? parsePrice(currentService.price_in_person)
-      : servicePrices[serviceType] ?? 0;
-  // Deposit = R500 consultation fee + 50% of service price
-  const serviceDeposit = Math.round(servicePrice * 0.5);
-  const totalDeposit = CONSULTATION_FEE + serviceDeposit;
+      : 0;
 
   const isCustomGarment = serviceType === "custom_garment";
   const isAlteration = serviceType === "alteration";
@@ -200,7 +193,7 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
       formData.append("clientPhone", data.clientPhone);
       formData.append("serviceType", data.serviceType);
       formData.append("preferredDate", data.preferredDate);
-      formData.append("amount", String(totalDeposit));
+      formData.append("amount", String(consultationFee));
       if (data.notes) formData.append("notes", data.notes);
 
       // Service-specific fields
@@ -373,30 +366,17 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
           />
         </Field>
 
-        {/* Pricing breakdown */}
-        <div className="rounded-xl border border-brand-purple/20 bg-brand-light-purple divide-y divide-brand-purple/10">
-          <div className="flex items-center justify-between px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-gray-700">Consultation fee</p>
-              <p className="text-xs text-gray-500">Fixed for all services</p>
-            </div>
-            <p className="font-semibold text-gray-900">{formatRand(CONSULTATION_FEE)}</p>
-          </div>
-          <div className="flex items-center justify-between px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-gray-700">50% service deposit</p>
-              <p className="text-xs text-gray-500">Balance due at/after your session</p>
-            </div>
-            <p className="font-semibold text-gray-900">
-              {servicePrice > 0 ? formatRand(serviceDeposit) : "—"}
+        {/* Consultation fee display */}
+        <div className="flex items-center justify-between p-4 rounded-xl bg-brand-light-purple border border-brand-purple/20">
+          <div>
+            <p className="text-sm font-medium text-gray-700">Consultation fee</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {sessionFormat === "video_call" ? "Video call session" : sessionFormat === "in_person" ? "In-person session" : "Select a session format above"}
             </p>
           </div>
-          <div className="flex items-center justify-between px-4 py-3">
-            <p className="text-sm font-bold text-brand-purple">Total due today</p>
-            <p className="font-heading text-2xl font-bold text-brand-purple">
-              {servicePrice > 0 ? formatRand(totalDeposit) : formatRand(CONSULTATION_FEE)}
-            </p>
-          </div>
+          <p className="font-heading text-2xl font-bold text-brand-purple">
+            {consultationFee > 0 ? formatRand(consultationFee) : "—"}
+          </p>
         </div>
 
         <Field label="Additional Notes" error={errors.notes?.message}>
@@ -637,18 +617,12 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-500">Due today</p>
+            <p className="text-xs text-gray-500">Consultation fee</p>
             <p className="font-heading text-3xl font-bold text-brand-purple">
-              {servicePrice > 0 ? formatRand(totalDeposit) : formatRand(CONSULTATION_FEE)}
+              {consultationFee > 0 ? formatRand(consultationFee) : "—"}
             </p>
           </div>
         </div>
-
-        {servicePrice > 0 && (
-          <p className="text-xs text-gray-500 mb-4">
-            Remaining balance of {formatRand(serviceDeposit)} is due at or after your session.
-          </p>
-        )}
 
         <p className="text-xs text-gray-500 mb-6 leading-relaxed">
           By clicking &quot;Pay &amp; Book&quot; you&apos;ll be redirected to
@@ -669,7 +643,7 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
             </>
           ) : (
             <>
-              Pay &amp; Book — {servicePrice > 0 ? formatRand(totalDeposit) : formatRand(CONSULTATION_FEE)}
+              Pay &amp; Book — {consultationFee > 0 ? formatRand(consultationFee) : "Select a format"}
             </>
           )}
         </button>

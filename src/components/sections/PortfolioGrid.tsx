@@ -7,7 +7,7 @@ import "yet-another-react-lightbox/styles.css";
 import { Badge } from "@/components/ui/Badge";
 import { LayoutGrid, List, ChevronLeft, ChevronRight, Heart, MessageCircle } from "lucide-react";
 
-type ImageCategory = "styling" | "custom_garment" | "alteration" | "corporate" | "event";
+type ImageCategory = "styling" | "custom_garment" | "alteration" | "corporate" | "event" | "vacation";
 type FilterCategory = "all" | "liked" | ImageCategory;
 type ViewMode = "grid" | "list";
 
@@ -28,6 +28,7 @@ const FILTER_LABELS: Record<FilterCategory, string> = {
   alteration:     "Alterations",
   corporate:      "Corporate",
   event:          "Events",
+  vacation:       "Vacations",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -36,9 +37,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   alteration:     "bg-amber-100  text-amber-700",
   corporate:      "bg-slate-100  text-slate-700",
   event:          "bg-emerald-100 text-emerald-700",
+  vacation:       "bg-cyan-100   text-cyan-700",
 };
 
-const FILTERS: FilterCategory[] = ["all", "liked", "styling", "custom_garment", "alteration", "corporate", "event"];
+const FILTERS: FilterCategory[] = ["all", "liked", "styling", "custom_garment", "alteration", "corporate", "event", "vacation"];
 const PAGE_SIZE = 12;
 
 const FALLBACK_IMAGES: PortfolioImage[] = Array.from({ length: 47 }, (_, i) => {

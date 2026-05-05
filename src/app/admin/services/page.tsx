@@ -96,7 +96,7 @@ export default function AdminServicesPage() {
     if (filterStatus === "hidden")  list = list.filter(s => s.active === false);
 
     if (sortKey === "title") list.sort((a, b) => a.title.localeCompare(b.title));
-    if (sortKey === "price") list.sort((a, b) => parsePrice(a.price_video_call) - parsePrice(b.price_video_call));
+    if (sortKey === "price") list.sort((a, b) => parsePrice(a.price_video_call ?? "") - parsePrice(b.price_video_call ?? ""));
 
     return list;
   }, [services, search, filterStatus, sortKey]);

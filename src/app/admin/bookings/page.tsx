@@ -7,6 +7,7 @@ import {
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { formatRand, getServiceLabel, formatPhone } from "@/lib/utils";
+import { AdminHelp } from "@/components/admin/AdminHelp";
 
 interface Booking {
   id: string;
@@ -111,6 +112,18 @@ export default function AdminBookingsPage() {
 
   return (
     <div>
+      <AdminHelp
+        page="bookings"
+        heading="Bookings — How this page works"
+        items={[
+          { title: "What is a booking?", body: "Each row is a customer who visited your booking page and started or completed a payment. Paid bookings are confirmed; Pending means payment wasn't finished." },
+          { title: "Contacting a client", body: "Click on any booking to open their full details, then use the email or WhatsApp buttons to reach them directly." },
+          { title: "Session format", body: "Each booking shows whether the client chose Video Call or In-Person, along with the date they prefer. You confirm the appointment with them separately." },
+          { title: "Sending a reply", body: "Use the 'Send Reply' button inside a booking to email the client directly from this panel." },
+          { title: "Filters", body: "Use the search box and status filter (All / Pending / Paid) to quickly find specific bookings." },
+        ]}
+      />
+
       {/* Page header */}
       <div className="flex items-center justify-between mb-8">
         <div>

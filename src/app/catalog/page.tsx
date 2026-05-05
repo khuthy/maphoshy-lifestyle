@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 const WHATSAPP_NUMBER = "27673708546";
 
-type Category = "styling" | "custom_garment" | "alteration" | "corporate" | "event";
+type Category = "styling" | "custom_garment" | "alteration" | "corporate" | "event" | "vacation";
 
 interface CatalogItem {
   id: string;
@@ -32,6 +32,7 @@ const CATEGORY_LABELS: Record<Category, string> = {
   alteration:     "Alterations",
   corporate:      "Corporate",
   event:          "Events",
+  vacation:       "Vacations",
 };
 
 const CATEGORY_COLORS: Record<Category, string> = {
@@ -40,6 +41,7 @@ const CATEGORY_COLORS: Record<Category, string> = {
   alteration:     "bg-amber-100 text-amber-700",
   corporate:      "bg-slate-100 text-slate-700",
   event:          "bg-emerald-100 text-emerald-700",
+  vacation:       "bg-cyan-100 text-cyan-700",
 };
 
 async function getCatalogItems(): Promise<CatalogItem[]> {

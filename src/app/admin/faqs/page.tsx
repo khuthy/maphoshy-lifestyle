@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, X, Check, Eye, EyeOff, MessageCircle } from "lucide-react";
+import { AdminHelp } from "@/components/admin/AdminHelp";
 
 interface FAQ {
   id: string;
@@ -97,6 +98,19 @@ export default function AdminFAQsPage() {
 
   return (
     <div>
+      <AdminHelp
+        page="faqs"
+        heading="FAQs — How this page works"
+        items={[
+          { title: "What are FAQs?", body: "FAQs (Frequently Asked Questions) are questions and answers that appear on your public website. They help customers understand your services before booking." },
+          { title: "Adding a question", body: "Click 'Add FAQ' to create a new question and answer. Both fields are required. Use clear, simple language that your customers will understand." },
+          { title: "Display order", body: "The number controls the order FAQs appear on the site. Lower numbers appear first. Set display order to 1 for the most important question." },
+          { title: "Show / Hide", body: "Click the Eye icon to hide a FAQ without deleting it. Hidden FAQs don't appear on the public site but stay saved for future use." },
+          { title: "Editing a question", body: "Click the pencil icon on any FAQ to edit the question, answer or display order. Changes are saved immediately." },
+          { title: "Deleting a question", body: "Click the bin icon to permanently delete a FAQ. This cannot be undone — use Hide instead if you might want it back later." },
+        ]}
+      />
+
       {/* Page header */}
       <div className="flex items-center justify-between mb-8">
         <div>

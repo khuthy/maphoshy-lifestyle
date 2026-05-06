@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AdminHelp } from "@/components/admin/AdminHelp";
+import { AdminTour } from "@/components/admin/AdminTour";
 import {
   Images, Settings, Tag, HelpCircle, ArrowUpRight,
   CalendarCheck, TrendingUp, Clock, CheckCircle, CreditCard,
@@ -59,13 +60,13 @@ const STATUS = {
 // ── Quick-nav sections ────────────────────────────────────────────────────────
 
 const SECTIONS = [
-  { href: "/admin/bookings",     icon: CalendarCheck, title: "Bookings",     description: "View all bookings, revenue and reply to clients.",              color: "bg-brand-light-purple text-brand-purple" },
-  { href: "/admin/portfolio",    icon: Images,        title: "Portfolio",    description: "Upload, organise and toggle visibility of portfolio images.",     color: "bg-violet-50 text-violet-600" },
-  { href: "/admin/testimonials", icon: Star,          title: "Testimonials", description: "Add, edit and manage client reviews shown on the home page.",    color: "bg-amber-50 text-amber-600" },
-  { href: "/admin/videos",       icon: Video,         title: "Videos",       description: "Add TikTok Get Ready With Me clips to the portfolio page.",      color: "bg-pink-50 text-pink-600" },
-  { href: "/admin/services",     icon: Settings,      title: "Services",     description: "Edit service titles, descriptions and inclusions.",              color: "bg-blue-50 text-blue-600" },
-  { href: "/admin/pricing",      icon: Tag,           title: "Pricing",      description: "Manage prices and highlight the most popular entry.",            color: "bg-sky-50 text-sky-600" },
-  { href: "/admin/faqs",         icon: HelpCircle,    title: "FAQs",         description: "Add, edit and reorder frequently asked questions.",              color: "bg-emerald-50 text-emerald-600" },
+  { href: "/admin/bookings",     icon: CalendarCheck, title: "Bookings",     description: "View all bookings, revenue and reply to clients.",              color: "bg-brand-light-purple text-brand-purple", tourTarget: "tour-bookings-card"     },
+  { href: "/admin/portfolio",    icon: Images,        title: "Portfolio",    description: "Upload, organise and toggle visibility of portfolio images.",     color: "bg-violet-50 text-violet-600",            tourTarget: "tour-portfolio-card"    },
+  { href: "/admin/testimonials", icon: Star,          title: "Testimonials", description: "Add, edit and manage client reviews shown on the home page.",    color: "bg-amber-50 text-amber-600",              tourTarget: "tour-testimonials-card" },
+  { href: "/admin/videos",       icon: Video,         title: "Videos",       description: "Add TikTok Get Ready With Me clips to the portfolio page.",      color: "bg-pink-50 text-pink-600",                tourTarget: undefined                },
+  { href: "/admin/services",     icon: Settings,      title: "Services",     description: "Edit service titles, descriptions and inclusions.",              color: "bg-blue-50 text-blue-600",                tourTarget: "tour-services-card"     },
+  { href: "/admin/pricing",      icon: Tag,           title: "Pricing",      description: "Manage prices and highlight the most popular entry.",            color: "bg-sky-50 text-sky-600",                  tourTarget: undefined                },
+  { href: "/admin/faqs",         icon: HelpCircle,    title: "FAQs",         description: "Add, edit and reorder frequently asked questions.",              color: "bg-emerald-50 text-emerald-600",           tourTarget: "tour-faqs-card"         },
 ];
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -95,15 +96,18 @@ export default async function AdminDashboard() {
       />
 
       {/* ── Header ── */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Welcome back. Here&apos;s what&apos;s happening with your bookings.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Welcome back. Here&apos;s what&apos;s happening with your bookings.
+          </p>
+        </div>
+        <AdminTour />
       </div>
 
       {/* ── Stats ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" data-tour="tour-stats">
         {stats.map(({ icon: Icon, label, value, sub, color, bg }) => (
           <div key={label} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
             <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center mb-4`}>
@@ -119,10 +123,11 @@ export default async function AdminDashboard() {
       <div>
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Manage Content</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {SECTIONS.map(({ href, icon: Icon, title, description, color }) => (
+          {SECTIONS.map(({ href, icon: Icon, title, description, color, tourTarget }) => (
             <Link
               key={href}
               href={href}
+              {...(tourTarget ? { "data-tour": tourTarget } : {})}
               className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-purple/30 transition-all group"
             >
               <div className="flex items-start justify-between mb-4">
@@ -141,7 +146,7 @@ export default async function AdminDashboard() {
         </div>
       </div>
       {/* ── Recent bookings ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden" data-tour="tour-recent-bookings">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div>

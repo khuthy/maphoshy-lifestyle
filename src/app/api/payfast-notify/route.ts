@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
 import { validatePayFastSignature } from "@/lib/payfast";
+import { addBookingToTeamsCalendar } from "@/lib/microsoft-calendar";
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,6 +47,20 @@ export async function POST(req: NextRequest) {
         console.error("Failed to update booking:", error);
         return new NextResponse("Booking update failed", { status: 500 });
       }
+
+      // Add to Teams / Outlook calendar (non-fatal — skipped if env vars not set)
+      await addBookingToTeamsCalendar({
+        reference:              booking.reference,
+        client_name:            booking.client_name,
+        client_email:           booking.client_email,
+        client_phone:           booking.client_phone,
+        service_type:           booking.service_type,
+        session_format:         booking.session_format ?? null,
+        preferred_date:         booking.preferred_date ?? "",
+        preferred_time:         booking.preferred_time ?? null,
+        session_duration_hours: booking.session_duration_hours ?? null,
+        notes:                  booking.notes ?? null,
+      });
 
       // Trigger confirmation emails
       const siteUrl =

@@ -74,21 +74,32 @@ export async function POST(req: NextRequest) {
 
     // Save booking to Supabase with status "pending"
     const supabase = createServerClient();
-    const { error: dbError } = await supabase.from("bookings").insert({
+
+    const baseInsert = {
       reference,
-      client_name: clientName,
-      client_email: clientEmail,
-      client_phone: clientPhone,
-      service_type: serviceType,
+      client_name:    clientName,
+      client_email:   clientEmail,
+      client_phone:   clientPhone,
+      service_type:   serviceType,
       service_details: serviceDetails,
-      preferred_date:          preferredDate || null,
-      preferred_time:          preferredTime || null,
-      session_duration_hours:  durationHours || null,
+      preferred_date: preferredDate || null,
       amount,
       payment_status: "pending",
       notes:          notes || null,
       session_format: sessionFormat || null,
+    };
+
+    // Try inserting with the new time columns (migration 010).
+    // If the columns don't exist yet, fall back to the base insert.
+    let { error: dbError } = await supabase.from("bookings").insert({
+      ...baseInsert,
+      preferred_time:         preferredTime || null,
+      session_duration_hours: durationHours || null,
     });
+
+    if (dbError?.message?.includes("preferred_time") || dbError?.message?.includes("session_duration_hours")) {
+      ({ error: dbError } = await supabase.from("bookings").insert(baseInsert));
+    }
 
     if (dbError) {
       console.error("Supabase insert error:", JSON.stringify(dbError));

@@ -7,14 +7,16 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
 
-    const clientName = formData.get("clientName") as string;
-    const clientEmail = formData.get("clientEmail") as string;
-    const clientPhone = formData.get("clientPhone") as string;
-    const serviceType = formData.get("serviceType") as string;
-    const preferredDate = formData.get("preferredDate") as string | null;
-    const amount = parseFloat(formData.get("amount") as string);
-    const notes = formData.get("notes") as string | null;
-    const sessionFormat = formData.get("sessionFormat") as string | null;
+    const clientName      = formData.get("clientName")      as string;
+    const clientEmail     = formData.get("clientEmail")     as string;
+    const clientPhone     = formData.get("clientPhone")     as string;
+    const serviceType     = formData.get("serviceType")     as string;
+    const preferredDate   = formData.get("preferredDate")   as string | null;
+    const preferredTime   = formData.get("preferredTime")   as string | null;
+    const sessionDuration = formData.get("sessionDuration") as string | null;
+    const amount          = parseFloat(formData.get("amount") as string);
+    const notes           = formData.get("notes")           as string | null;
+    const sessionFormat   = formData.get("sessionFormat")   as string | null;
     const serviceDetailsRaw = formData.get("serviceDetails") as string | null;
 
     // Validate required fields
@@ -25,9 +27,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const serviceDetails = serviceDetailsRaw
-      ? JSON.parse(serviceDetailsRaw)
-      : null;
+    const serviceDetails = serviceDetailsRaw ? JSON.parse(serviceDetailsRaw) : null;
+    const durationHours = sessionDuration ? parseFloat(sessionDuration) : null;
+
+    // ── Conflict check: block overlapping time slots ──────────────────────────
+    if (preferredDate && preferredTime && durationHours) {
+      const supabaseCheck = createServerClient();
+      const { data: existing } = await supabaseCheck
+        .from("bookings")
+        .select("preferred_time, session_duration_hours")
+        .eq("preferred_date", preferredDate)
+        .in("payment_status", ["paid", "pending"])
+        .not("preferred_time", "is", null);
+
+      const toMin = (t: string) => {
+        const [h, m] = t.split(":").map(Number);
+        return h * 60 + m;
+      };
+
+      const reqStart = toMin(preferredTime);
+      const reqEnd   = reqStart + durationHours * 60;
+
+      const conflict = (existing ?? []).some(b => {
+        if (!b.preferred_time) return false;
+        const bs = toMin(b.preferred_time as string);
+        const be = bs + (Number(b.session_duration_hours ?? 1)) * 60;
+        return reqStart < be && reqEnd > bs;
+      });
+
+      if (conflict) {
+        return NextResponse.json(
+          { error: "That time slot has just been taken. Please choose a different time." },
+          { status: 409 }
+        );
+      }
+    }
 
     const reference = generateBookingReference();
 
@@ -47,10 +81,12 @@ export async function POST(req: NextRequest) {
       client_phone: clientPhone,
       service_type: serviceType,
       service_details: serviceDetails,
-      preferred_date: preferredDate || null,
+      preferred_date:          preferredDate || null,
+      preferred_time:          preferredTime || null,
+      session_duration_hours:  durationHours || null,
       amount,
       payment_status: "pending",
-      notes: notes || null,
+      notes:          notes || null,
       session_format: sessionFormat || null,
     });
 

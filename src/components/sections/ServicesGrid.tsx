@@ -15,7 +15,9 @@ export interface ServiceRow {
   title: string;
   description: string;
   includes: string[];
-  price_from: string;
+  price_from?: string | null;
+  price_video_call?: string | null;
+  price_in_person?: string | null;
   booking_key: string;
   icon_name: string;
   display_order?: number;
@@ -27,20 +29,14 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Heart, Palette, Crown, Gem, Wand2, Camera, Users, Settings,
 };
 
-type SortKey = "order" | "title" | "price_asc" | "price_desc";
+type SortKey = "order" | "title";
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: "order",      label: "Featured"          },
-  { value: "title",      label: "Title A–Z"         },
-  { value: "price_asc",  label: "Price: Low → High" },
-  { value: "price_desc", label: "Price: High → Low" },
+  { value: "order", label: "Featured"  },
+  { value: "title", label: "Title A–Z" },
 ];
 
 const PAGE_SIZE = 4;
-
-function parsePrice(val: string) {
-  return parseFloat((val ?? "").replace(/[^0-9.]/g, "") || "0");
-}
 
 export function ServicesGrid({ services }: { services: ServiceRow[] }) {
   const [search, setSearch]   = useState("");
@@ -60,9 +56,7 @@ export function ServicesGrid({ services }: { services: ServiceRow[] }) {
       );
     }
 
-    if (sortKey === "title")      list.sort((a, b) => a.title.localeCompare(b.title));
-    if (sortKey === "price_asc")  list.sort((a, b) => parsePrice(a.price_from) - parsePrice(b.price_from));
-    if (sortKey === "price_desc") list.sort((a, b) => parsePrice(b.price_from) - parsePrice(a.price_from));
+    if (sortKey === "title") list.sort((a, b) => a.title.localeCompare(b.title));
 
     return list;
   }, [services, search, sortKey]);
@@ -141,12 +135,28 @@ export function ServicesGrid({ services }: { services: ServiceRow[] }) {
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
                         <h2 className="font-heading text-2xl md:text-3xl font-bold text-gray-900 leading-snug">{service.title}</h2>
-                        {service.price_from && (
-                          <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold shrink-0"
-                            style={{ background: "rgba(201,150,74,0.12)", color: "#9a6e2e" }}>
-                            From {service.price_from}
-                          </span>
-                        )}
+                        <div className="flex flex-col gap-1.5 shrink-0">
+                          {service.price_video_call ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
+                              style={{ background: "rgba(201,150,74,0.12)", color: "#9a6e2e" }}>
+                              💻 Video Call — {service.price_video_call}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-400">
+                              💻 Video Call — fees not yet set
+                            </span>
+                          )}
+                          {service.price_in_person ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
+                              style={{ background: "rgba(201,150,74,0.12)", color: "#9a6e2e" }}>
+                              🤝 In-Person — {service.price_in_person}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-400">
+                              🤝 In-Person — fees not yet set
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <p className="text-gray-500 leading-relaxed mb-7 text-[15px]">{service.description}</p>

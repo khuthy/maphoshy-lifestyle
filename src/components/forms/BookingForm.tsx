@@ -5,8 +5,53 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useSearchParams } from "next/navigation";
-import { Upload, Loader2, AlertCircle } from "lucide-react";
+import { Upload, Loader2, AlertCircle, Clock } from "lucide-react";
 import { STYLE_WORDS } from "@/types/booking";
+
+// ── Time slot constants ──────────────────────────────────────────────────
+const BUSINESS_START = 8 * 60;  // 08:00
+const BUSINESS_END   = 18 * 60; // 18:00
+
+const SLOT_INTERVAL = 30; // minutes
+
+const ALL_SLOTS: string[] = [];
+for (let m = BUSINESS_START; m < BUSINESS_END; m += SLOT_INTERVAL) {
+  ALL_SLOTS.push(`${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
+}
+
+const DURATIONS = [
+  { value: "1",   label: "1 hour"    },
+  { value: "1.5", label: "1.5 hours" },
+  { value: "2",   label: "2 hours"   },
+  { value: "2.5", label: "2.5 hours" },
+  { value: "3",   label: "3 hours"   },
+];
+
+const TIME_GROUPS = [
+  { label: "Morning",   slots: ALL_SLOTS.filter(t => { const h = parseInt(t); return h >= 8  && h < 12; }) },
+  { label: "Afternoon", slots: ALL_SLOTS.filter(t => { const h = parseInt(t); return h >= 12 && h < 16; }) },
+  { label: "Late",      slots: ALL_SLOTS.filter(t => { const h = parseInt(t); return h >= 16; }) },
+];
+
+function toMin(t: string) {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function slotFitsInDay(slot: string, durationHours: number) {
+  return toMin(slot) + durationHours * 60 <= BUSINESS_END;
+}
+
+function slotIsAvailable(
+  slot: string,
+  durationHours: number,
+  booked: { start: string; end: string }[]
+) {
+  if (!slotFitsInDay(slot, durationHours)) return false;
+  const s = toMin(slot);
+  const e = s + durationHours * 60;
+  return !booked.some(b => s < toMin(b.end) && e > toMin(b.start));
+}
 import { formatRand } from "@/lib/utils";
 
 // ── Zod schema ──────────────────────────────────────────────────────────
@@ -19,6 +64,8 @@ const baseSchema = z.object({
     .regex(/^[0-9+\s()-]{10,15}$/, "Invalid phone number format"),
   serviceType: z.string().min(1, "Please select a service"),
   preferredDate: z.string().min(1, "Please select a preferred date"),
+  preferredTime: z.string().min(1, "Please select a time slot"),
+  sessionDuration: z.string().min(1, "Please select a session duration"),
   notes: z.string().optional(),
   // Custom garment fields
   bust: z.string().optional(),
@@ -99,6 +146,8 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [bookedRanges, setBookedRanges] = useState<{ start: string; end: string }[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   // Build lookup maps from the dynamic services list
   const serviceLabels: Record<string, string> = Object.fromEntries(
@@ -126,9 +175,31 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
     },
   });
 
-  const serviceType = watch("serviceType");
-  const sessionFormat = watch("sessionFormat");
+  const serviceType      = watch("serviceType");
+  const sessionFormat    = watch("sessionFormat");
   const selectedStyleWords = watch("styleWords") ?? [];
+  const preferredDate    = watch("preferredDate");
+  const sessionDuration  = watch("sessionDuration");
+  const preferredTime    = watch("preferredTime");
+
+  // Fetch booked slots whenever the date changes
+  useEffect(() => {
+    if (!preferredDate) { setBookedRanges([]); return; }
+    setLoadingSlots(true);
+    setValue("preferredTime", "");
+    fetch(`/api/booked-slots?date=${preferredDate}`)
+      .then(r => r.json())
+      .then(data => setBookedRanges(data.bookedRanges ?? []))
+      .catch(() => setBookedRanges([]))
+      .finally(() => setLoadingSlots(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preferredDate]);
+
+  // Clear selected time when duration changes
+  useEffect(() => {
+    setValue("preferredTime", "");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionDuration]);
 
   // Update service when URL param changes
   useEffect(() => {
@@ -191,6 +262,8 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
       formData.append("clientPhone", data.clientPhone);
       formData.append("serviceType", data.serviceType);
       formData.append("preferredDate", data.preferredDate);
+      formData.append("preferredTime", data.preferredTime);
+      formData.append("sessionDuration", data.sessionDuration);
       formData.append("amount", String(consultationFee));
       if (data.notes) formData.append("notes", data.notes);
 
@@ -302,7 +375,7 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
             label="Preferred Date"
             required
             error={errors.preferredDate?.message}
-            hint="This is your preferred date — we will confirm availability."
+            hint="Pick a date to see available time slots."
           >
             <input
               {...register("preferredDate")}
@@ -312,6 +385,118 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
             />
           </Field>
         </div>
+
+        {/* ── Time Slot Picker ── */}
+        {preferredDate && (
+          <div className="space-y-5 pt-2">
+            {/* Duration selector */}
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-700">
+                Session Duration <span className="text-red-500">*</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {DURATIONS.map(d => (
+                  <button
+                    key={d.value}
+                    type="button"
+                    onClick={() => setValue("sessionDuration", d.value, { shouldValidate: true })}
+                    className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${
+                      sessionDuration === d.value
+                        ? "border-brand-purple bg-brand-light-purple text-brand-purple"
+                        : "border-gray-200 text-gray-600 hover:border-brand-purple/40"
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+              {errors.sessionDuration && (
+                <p className="text-xs text-red-600 flex items-center gap-1">
+                  <AlertCircle size={12} /> {errors.sessionDuration.message}
+                </p>
+              )}
+            </div>
+
+            {/* Time slot grid */}
+            {sessionDuration && (
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                  Available Times
+                  {loadingSlots && <Loader2 size={13} className="animate-spin text-brand-purple" />}
+                  <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-gray-500">
+                  Showing available {sessionDuration}-hour slots for{" "}
+                  {new Date(preferredDate + "T00:00:00").toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long" })}
+                </p>
+
+                {!loadingSlots && (
+                  <div className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4 space-y-4">
+                    {TIME_GROUPS.map(group => {
+                      const slots = group.slots.filter(s => slotFitsInDay(s, Number(sessionDuration)));
+                      if (slots.length === 0) return null;
+                      return (
+                        <div key={group.label}>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                            <Clock size={10} /> {group.label}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {slots.map(slot => {
+                              const available = slotIsAvailable(slot, Number(sessionDuration), bookedRanges);
+                              const selected  = preferredTime === slot;
+                              return (
+                                <button
+                                  key={slot}
+                                  type="button"
+                                  disabled={!available}
+                                  onClick={() => available && setValue("preferredTime", slot, { shouldValidate: true })}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                    selected
+                                      ? "bg-brand-purple text-white shadow-sm"
+                                      : available
+                                      ? "bg-white border border-gray-200 text-gray-700 hover:border-brand-purple hover:text-brand-purple"
+                                      : "bg-gray-100 text-gray-300 cursor-not-allowed line-through"
+                                  }`}
+                                >
+                                  {slot}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Show "no slots" if every possible slot is blocked */}
+                    {TIME_GROUPS.every(g =>
+                      g.slots.filter(s => slotFitsInDay(s, Number(sessionDuration)))
+                        .every(s => !slotIsAvailable(s, Number(sessionDuration), bookedRanges))
+                    ) && (
+                      <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-medium">
+                        No time slots available for this date and duration. Please choose a different date.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {errors.preferredTime && (
+                  <p className="text-xs text-red-600 flex items-center gap-1">
+                    <AlertCircle size={12} /> {errors.preferredTime.message}
+                  </p>
+                )}
+
+                {preferredTime && (
+                  <p className="text-xs text-emerald-600 font-semibold">
+                    ✓ Selected: {preferredTime} – {(() => {
+                      const end = toMin(preferredTime) + Number(sessionDuration) * 60;
+                      return `${String(Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`;
+                    })()}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── Section 2: Service selection ── */}

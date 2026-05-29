@@ -7,6 +7,7 @@ import { z } from "zod";
 import { useSearchParams } from "next/navigation";
 import { Upload, Loader2, AlertCircle, Clock } from "lucide-react";
 import { STYLE_WORDS } from "@/types/booking";
+import { BookingCalendar } from "@/components/forms/BookingCalendar";
 
 // ── Time slot constants ──────────────────────────────────────────────────
 const BUSINESS_START = 8 * 60;  // 08:00
@@ -346,11 +347,7 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
             />
           </Field>
 
-          <Field
-            label="Email Address"
-            required
-            error={errors.clientEmail?.message}
-          >
+          <Field label="Email Address" required error={errors.clientEmail?.message}>
             <input
               {...register("clientEmail")}
               type="email"
@@ -359,32 +356,35 @@ export function BookingForm({ services }: { services: BookingServiceOption[] }) 
             />
           </Field>
 
-          <Field
-            label="Phone Number"
-            required
-            error={errors.clientPhone?.message}
-          >
+          <Field label="Phone Number" required error={errors.clientPhone?.message}>
             <input
               {...register("clientPhone")}
               placeholder="073 000 0000"
               className={inputCls}
             />
           </Field>
-
-          <Field
-            label="Preferred Date"
-            required
-            error={errors.preferredDate?.message}
-            hint="Pick a date to see available time slots."
-          >
-            <input
-              {...register("preferredDate")}
-              type="date"
-              min={new Date().toISOString().split("T")[0]}
-              className={inputCls}
-            />
-          </Field>
         </div>
+
+        {/* ── Date picker ── */}
+        <Field
+          label="Preferred Date"
+          required
+          error={errors.preferredDate?.message}
+          hint="Past dates are disabled. Amber dot = some slots available. Red dot = fully booked."
+        >
+          <Controller
+            control={control}
+            name="preferredDate"
+            render={({ field }) => (
+              <BookingCalendar
+                value={field.value ?? ""}
+                onChange={(date) => {
+                  field.onChange(date);
+                }}
+              />
+            )}
+          />
+        </Field>
 
         {/* ── Time Slot Picker ── */}
         {preferredDate && (

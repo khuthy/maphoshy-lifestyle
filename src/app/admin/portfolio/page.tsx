@@ -118,7 +118,8 @@ export default function AdminPortfolioPage() {
       setForm((f) => ({ ...f, src: url }));
       setUploadProgress("Uploaded successfully");
     } else {
-      setUploadProgress("Upload failed — please try again");
+      const body = await res.json().catch(() => ({}));
+      setUploadProgress(`Upload failed — ${body.error ?? "please try again"}`);
     }
   }
 

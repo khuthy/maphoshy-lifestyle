@@ -27,7 +27,10 @@ export async function POST(req: NextRequest) {
     .from(BUCKET)
     .upload(filename, buffer, { contentType: file.type, upsert: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("Supabase storage upload error:", JSON.stringify(error));
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
   const { data: urlData } = db.storage.from(BUCKET).getPublicUrl(filename);
   return NextResponse.json({ url: urlData.publicUrl }, { status: 201 });

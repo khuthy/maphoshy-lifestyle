@@ -42,16 +42,43 @@ const SLOT_HINTS: Record<Tab, string[]> = {
   portfolio_preview: PORTFOLIO_SLOT_HINTS,
 };
 
-function makeEmptySlots(n: number): Slot[] {
-  return Array.from({ length: n }, () => ({ ...EMPTY_SLOT }));
+// Fallback values matching the hardcoded images on the home page.
+// Pre-filled so the admin can see (and save) the current defaults immediately.
+const FALLBACK_SLOTS: Record<Tab, Slot[]> = {
+  hero: [
+    { src: "/assets/image00003.jpeg", alt: "Maphoshy Lifestyle — personal styling",  label: "Styling"   },
+    { src: "/assets/image00007.jpeg", alt: "Maphoshy Lifestyle — event styling",      label: ""          },
+    { src: "/assets/image00011.jpeg", alt: "Maphoshy Lifestyle — custom garment",     label: ""          },
+    { src: "/assets/image00021.jpeg", alt: "Maphoshy Lifestyle — corporate styling",  label: "Corporate" },
+  ],
+  about: [
+    { src: "/assets/image00010.jpeg", alt: "Maphoshy Lifestyle styling",       label: "" },
+    { src: "/assets/image00020.jpeg", alt: "Maphoshy Lifestyle event styling", label: "" },
+    { src: "/assets/image00025.jpeg", alt: "Maphoshy Lifestyle wardrobe",      label: "" },
+  ],
+  portfolio_preview: [
+    { src: "/assets/image00003.jpeg", alt: "Maphoshy Lifestyle portfolio", label: "" },
+    { src: "/assets/image00007.jpeg", alt: "Maphoshy Lifestyle portfolio", label: "" },
+    { src: "/assets/image00005.jpeg", alt: "Maphoshy Lifestyle portfolio", label: "" },
+    { src: "/assets/image00009.jpeg", alt: "Maphoshy Lifestyle portfolio", label: "" },
+    { src: "/assets/image00013.jpeg", alt: "Maphoshy Lifestyle portfolio", label: "" },
+  ],
+};
+
+function mergeWithFallback(images: Slot[], tab: Tab): Slot[] {
+  const fallback = FALLBACK_SLOTS[tab];
+  return fallback.map((fb, i) => {
+    const db = images[i];
+    return db?.src ? db : { ...fb };
+  });
 }
 
 export default function HomeImagesPage() {
   const [activeTab, setActiveTab]   = useState<Tab>("hero");
   const [slotMap, setSlotMap]       = useState<Record<Tab, Slot[]>>({
-    hero:              makeEmptySlots(4),
-    about:             makeEmptySlots(3),
-    portfolio_preview: makeEmptySlots(5),
+    hero:              [...FALLBACK_SLOTS.hero],
+    about:             [...FALLBACK_SLOTS.about],
+    portfolio_preview: [...FALLBACK_SLOTS.portfolio_preview],
   });
   const [loadedTabs, setLoadedTabs] = useState<Set<Tab>>(new Set());
   const [loading, setLoading]       = useState(false);
@@ -72,11 +99,13 @@ export default function HomeImagesPage() {
     fetch(url)
       .then(r => r.json())
       .then(({ images }) => {
-        const count = SLOT_COUNT[activeTab];
-        const next  = makeEmptySlots(count).map((_, i) => {
-          const img = (images ?? [])[i];
-          return img ? { id: img.id ?? null, src: img.src, alt: img.alt, label: img.label ?? "" } : { ...EMPTY_SLOT };
-        });
+        const dbSlots: Slot[] = (images ?? []).map((img: Slot) => ({
+          id:    img.id ?? null,
+          src:   img.src,
+          alt:   img.alt,
+          label: img.label ?? "",
+        }));
+        const next = mergeWithFallback(dbSlots, activeTab);
         setSlotMap(prev => ({ ...prev, [activeTab]: next }));
         setLoadedTabs(prev => new Set(prev).add(activeTab));
       })

@@ -133,6 +133,37 @@ async function getServiceTitles(): Promise<string[]> {
   return [];
 }
 
+interface HomeImage { src: string; alt: string; label?: string }
+
+const FALLBACK_ABOUT: HomeImage[] = [
+  { src: "/assets/image00010.jpeg", alt: "Maphoshy Lifestyle styling" },
+  { src: "/assets/image00020.jpeg", alt: "Maphoshy Lifestyle event styling" },
+  { src: "/assets/image00025.jpeg", alt: "Maphoshy Lifestyle wardrobe" },
+];
+const FALLBACK_PORTFOLIO_PREVIEW: HomeImage[] = [
+  { src: "/assets/image00003.jpeg", alt: "Maphoshy Lifestyle portfolio" },
+  { src: "/assets/image00007.jpeg", alt: "Maphoshy Lifestyle portfolio" },
+  { src: "/assets/image00005.jpeg", alt: "Maphoshy Lifestyle portfolio" },
+  { src: "/assets/image00009.jpeg", alt: "Maphoshy Lifestyle portfolio" },
+  { src: "/assets/image00013.jpeg", alt: "Maphoshy Lifestyle portfolio" },
+];
+
+async function getHomeSectionImages(section: "about" | "portfolio_preview", expected: number, fallback: HomeImage[]): Promise<HomeImage[]> {
+  try {
+    const db = createPublicServerClient();
+    const { data, error } = await db
+      .from("home_page_images")
+      .select("src, alt, label")
+      .eq("section", section)
+      .order("slot_number", { ascending: true })
+      .limit(expected);
+    if (!error && data && data.length === expected) {
+      return data.map(d => ({ src: d.src, alt: d.alt, label: d.label ?? "" }));
+    }
+  } catch { /* use fallback */ }
+  return fallback;
+}
+
 async function getTestimonials() {
   try {
     const db = createPublicServerClient();
@@ -157,7 +188,14 @@ const whyUs = [
 ];
 
 export default async function HomePage() {
-  const [testimonials, serviceCount, heroImages, serviceTitles] = await Promise.all([getTestimonials(), getServiceCount(), getHeroImages(), getServiceTitles()]);
+  const [testimonials, serviceCount, heroImages, serviceTitles, aboutImages, portfolioPreviewImages] = await Promise.all([
+    getTestimonials(),
+    getServiceCount(),
+    getHeroImages(),
+    getServiceTitles(),
+    getHomeSectionImages("about", 3, FALLBACK_ABOUT),
+    getHomeSectionImages("portfolio_preview", 5, FALLBACK_PORTFOLIO_PREVIEW),
+  ]);
   return (
     <>
       {/* HERO */}
@@ -216,14 +254,14 @@ export default async function HomePage() {
             {/* Image grid */}
             <div className="relative grid grid-cols-2 gap-3 h-[500px]">
               <div className="relative rounded-2xl overflow-hidden">
-                <Image src="/assets/image00010.jpeg" alt="Maphoshy Lifestyle styling" fill className="object-cover" sizes="25vw" />
+                <Image src={aboutImages[0].src} alt={aboutImages[0].alt} fill className="object-cover" sizes="25vw" unoptimized={aboutImages[0].src.startsWith("http")} />
               </div>
               <div className="grid grid-rows-2 gap-3">
                 <div className="relative rounded-2xl overflow-hidden">
-                  <Image src="/assets/image00020.jpeg" alt="Maphoshy Lifestyle event styling" fill className="object-cover" sizes="15vw" />
+                  <Image src={aboutImages[1].src} alt={aboutImages[1].alt} fill className="object-cover" sizes="15vw" unoptimized={aboutImages[1].src.startsWith("http")} />
                 </div>
                 <div className="relative rounded-2xl overflow-hidden">
-                  <Image src="/assets/image00025.jpeg" alt="Maphoshy Lifestyle wardrobe" fill className="object-cover" sizes="15vw" />
+                  <Image src={aboutImages[2].src} alt={aboutImages[2].alt} fill className="object-cover" sizes="15vw" unoptimized={aboutImages[2].src.startsWith("http")} />
                 </div>
               </div>
               {/* Floating badge */}
@@ -326,24 +364,24 @@ export default async function HomePage() {
           <div className="grid grid-cols-12 grid-rows-2 gap-3 h-[480px] md:h-[560px]">
             {/* Large left */}
             <div className="col-span-5 row-span-2 relative rounded-2xl overflow-hidden group">
-              <Image src="/assets/image00003.jpeg" alt="Maphoshy Lifestyle portfolio" fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="42vw" />
+              <Image src={portfolioPreviewImages[0].src} alt={portfolioPreviewImages[0].alt} fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="42vw" unoptimized={portfolioPreviewImages[0].src.startsWith("http")} />
               <div className="absolute inset-0 bg-brand-purple/0 group-hover:bg-brand-purple/15 transition-all duration-300" />
             </div>
             {/* Top middle */}
             <div className="col-span-4 row-span-1 relative rounded-2xl overflow-hidden group">
-              <Image src="/assets/image00007.jpeg" alt="Maphoshy Lifestyle portfolio" fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="33vw" />
+              <Image src={portfolioPreviewImages[1].src} alt={portfolioPreviewImages[1].alt} fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="33vw" unoptimized={portfolioPreviewImages[1].src.startsWith("http")} />
             </div>
             {/* Top right */}
             <div className="col-span-3 row-span-1 relative rounded-2xl overflow-hidden group">
-              <Image src="/assets/image00005.jpeg" alt="Maphoshy Lifestyle portfolio" fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="25vw" />
+              <Image src={portfolioPreviewImages[2].src} alt={portfolioPreviewImages[2].alt} fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="25vw" unoptimized={portfolioPreviewImages[2].src.startsWith("http")} />
             </div>
             {/* Bottom middle */}
             <div className="col-span-3 row-span-1 relative rounded-2xl overflow-hidden group">
-              <Image src="/assets/image00009.jpeg" alt="Maphoshy Lifestyle portfolio" fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="25vw" />
+              <Image src={portfolioPreviewImages[3].src} alt={portfolioPreviewImages[3].alt} fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="25vw" unoptimized={portfolioPreviewImages[3].src.startsWith("http")} />
             </div>
             {/* Bottom right */}
             <div className="col-span-4 row-span-1 relative rounded-2xl overflow-hidden group">
-              <Image src="/assets/image00013.jpeg" alt="Maphoshy Lifestyle portfolio" fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="33vw" />
+              <Image src={portfolioPreviewImages[4].src} alt={portfolioPreviewImages[4].alt} fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="33vw" unoptimized={portfolioPreviewImages[4].src.startsWith("http")} />
             </div>
           </div>
         </div>

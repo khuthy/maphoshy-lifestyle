@@ -4,50 +4,92 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Upload, ImageIcon, CheckCircle, AlertCircle, Info } from "lucide-react";
 
-interface Slot {
-  id:    string | null;
-  src:   string;
-  alt:   string;
-  label: string;
-}
+interface Slot { id?: string | null; src: string; alt: string; label: string }
 
-const EMPTY_SLOT: Slot = { id: null, src: "", alt: "", label: "" };
+const EMPTY_SLOT: Slot = { src: "", alt: "", label: "" };
 
-const SLOT_LABELS = [
-  { name: "Image 1", hint: "Large left card — most prominent" },
-  { name: "Image 2", hint: "Top centre-right card"           },
-  { name: "Image 3", hint: "Far right tall card"             },
-  { name: "Image 4", hint: "Bottom overlapping card"         },
+type Tab = "hero" | "about" | "portfolio_preview";
+
+const TABS: { id: Tab; label: string; description: string }[] = [
+  { id: "hero",              label: "Hero Mosaic",       description: "4 floating cards on the dark hero banner at the top of the home page." },
+  { id: "about",             label: "About Section",     description: "3 images in the grid next to the 'Style is a form of self-expression' text." },
+  { id: "portfolio_preview", label: "Portfolio Section", description: "5 images in the asymmetric 'The Work Speaks' grid on the home page." },
 ];
 
-export default function HeroImagesPage() {
-  const [slots, setSlots]       = useState<Slot[]>([EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT]);
-  const [loading, setLoading]   = useState(true);
-  const [saving, setSaving]     = useState(false);
-  const [status, setStatus]     = useState<"idle" | "saved" | "error">("idle");
-  const [uploading, setUploading] = useState<number | null>(null);
-  const fileRefs = [
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-  ];
+const SLOT_COUNT: Record<Tab, number> = { hero: 4, about: 3, portfolio_preview: 5 };
+
+const HERO_SLOT_HINTS = [
+  "Large left card — most prominent",
+  "Top centre-right card",
+  "Far right tall card",
+  "Bottom overlapping card",
+];
+const ABOUT_SLOT_HINTS = [
+  "Large left image",
+  "Top right image",
+  "Bottom right image",
+];
+const PORTFOLIO_SLOT_HINTS = [
+  "Large left — spans full height",
+  "Top middle",
+  "Top right",
+  "Bottom middle",
+  "Bottom right",
+];
+const SLOT_HINTS: Record<Tab, string[]> = {
+  hero:              HERO_SLOT_HINTS,
+  about:             ABOUT_SLOT_HINTS,
+  portfolio_preview: PORTFOLIO_SLOT_HINTS,
+};
+
+function makeEmptySlots(n: number): Slot[] {
+  return Array.from({ length: n }, () => ({ ...EMPTY_SLOT }));
+}
+
+export default function HomeImagesPage() {
+  const [activeTab, setActiveTab]   = useState<Tab>("hero");
+  const [slotMap, setSlotMap]       = useState<Record<Tab, Slot[]>>({
+    hero:              makeEmptySlots(4),
+    about:             makeEmptySlots(3),
+    portfolio_preview: makeEmptySlots(5),
+  });
+  const [loadedTabs, setLoadedTabs] = useState<Set<Tab>>(new Set());
+  const [loading, setLoading]       = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [status, setStatus]         = useState<"idle" | "saved" | "error">("idle");
+  const [uploading, setUploading]   = useState<number | null>(null);
+
+  const fileRefs = Array.from({ length: 5 }, () => useRef<HTMLInputElement>(null));
 
   useEffect(() => {
-    fetch("/api/admin/hero-images")
+    if (loadedTabs.has(activeTab)) return;
+    setLoading(true);
+
+    const url = activeTab === "hero"
+      ? "/api/admin/hero-images"
+      : `/api/admin/home-sections?section=${activeTab}`;
+
+    fetch(url)
       .then(r => r.json())
       .then(({ images }) => {
-        const next: Slot[] = [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT].map((_, i) => {
-          const img = images[i];
-          return img ? { id: img.id, src: img.src, alt: img.alt, label: img.label ?? "" } : { ...EMPTY_SLOT };
+        const count = SLOT_COUNT[activeTab];
+        const next  = makeEmptySlots(count).map((_, i) => {
+          const img = (images ?? [])[i];
+          return img ? { id: img.id ?? null, src: img.src, alt: img.alt, label: img.label ?? "" } : { ...EMPTY_SLOT };
         });
-        setSlots(next);
+        setSlotMap(prev => ({ ...prev, [activeTab]: next }));
+        setLoadedTabs(prev => new Set(prev).add(activeTab));
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [activeTab, loadedTabs]);
+
+  const slots = slotMap[activeTab];
 
   function update(index: number, patch: Partial<Slot>) {
-    setSlots(prev => prev.map((s, i) => i === index ? { ...s, ...patch } : s));
+    setSlotMap(prev => ({
+      ...prev,
+      [activeTab]: prev[activeTab].map((s, i) => i === index ? { ...s, ...patch } : s),
+    }));
     setStatus("idle");
   }
 
@@ -69,22 +111,27 @@ export default function HeroImagesPage() {
   async function handleSave() {
     setSaving(true);
     setStatus("idle");
-    const res = await fetch("/api/admin/hero-images", {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ slots }),
-    });
+
+    let res: Response;
+    if (activeTab === "hero") {
+      res = await fetch("/api/admin/hero-images", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ slots }),
+      });
+    } else {
+      res = await fetch("/api/admin/home-sections", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ section: activeTab, slots }),
+      });
+    }
+
     setSaving(false);
     setStatus(res.ok ? "saved" : "error");
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-48">
-        <p className="text-gray-400 text-sm">Loading hero images…</p>
-      </div>
-    );
-  }
+  const hints = SLOT_HINTS[activeTab];
 
   return (
     <div className="space-y-6">
@@ -93,24 +140,46 @@ export default function HeroImagesPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Home Page Images</h1>
           <p className="text-sm text-gray-500 mt-1">
-            These 4 images appear in the photo mosaic on your home page. Upload or paste a URL for each slot, then click Save.
+            Manage the photos that appear in each section of your home page.
           </p>
         </div>
-
         <button
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || loading}
           className="shrink-0 px-5 py-2.5 bg-brand-purple text-white text-sm font-semibold rounded-xl hover:bg-brand-purple/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
           {saving ? "Saving…" : "Save Changes"}
         </button>
       </div>
 
-      {/* Status banner */}
+      {/* Tabs */}
+      <div className="flex gap-1 p-1 bg-gray-100 rounded-xl w-fit">
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => { setActiveTab(tab.id); setStatus("idle"); }}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+              activeTab === tab.id
+                ? "bg-white text-brand-purple shadow-sm"
+                : "text-gray-500 hover:text-gray-800"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab description */}
+      <div className="flex items-start gap-2.5 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-700">
+        <Info size={15} className="shrink-0 mt-0.5" />
+        {TABS.find(t => t.id === activeTab)?.description}
+      </div>
+
+      {/* Status banners */}
       {status === "saved" && (
         <div className="flex items-center gap-2 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700">
           <CheckCircle size={16} className="shrink-0" />
-          Changes saved — your home page now shows the updated images.
+          Saved — your home page now shows the updated images.
         </div>
       )}
       {status === "error" && (
@@ -120,133 +189,111 @@ export default function HeroImagesPage() {
         </div>
       )}
 
-      {/* Info note */}
-      <div className="flex items-start gap-2.5 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-700">
-        <Info size={15} className="shrink-0 mt-0.5" />
-        <span>
-          The mosaic is visible on larger screens. On mobile, only the text section of the hero is shown.
-          You need all 4 slots filled for the mosaic to appear.
-        </span>
-      </div>
+      {/* Slots grid */}
+      {loading ? (
+        <div className="flex items-center justify-center h-40">
+          <p className="text-gray-400 text-sm">Loading…</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {slots.map((slot, i) => (
+            <div key={i} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
-      {/* 4 Slots */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {slots.map((slot, i) => (
-          <div key={i} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-
-            {/* Slot header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/60">
-              <div>
-                <p className="text-sm font-semibold text-gray-800">{SLOT_LABELS[i].name}</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">{SLOT_LABELS[i].hint}</p>
+              {/* Slot header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/60">
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">Image {i + 1}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">{hints[i]}</p>
+                </div>
+                <span className="text-xs font-bold text-brand-purple bg-brand-light-purple px-2 py-1 rounded-lg">
+                  Slot {i + 1}
+                </span>
               </div>
-              <span className="text-xs font-bold text-brand-purple bg-brand-light-purple px-2 py-1 rounded-lg">
-                Slot {i + 1}
-              </span>
-            </div>
 
-            {/* Image preview / upload area */}
-            <div className="p-4 space-y-3">
-              <div
-                className="relative w-full rounded-xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 cursor-pointer hover:border-brand-purple/50 hover:bg-brand-light-purple/10 transition-all"
-                style={{ aspectRatio: "4/3" }}
-                onClick={() => fileRefs[i].current?.click()}
-              >
-                {slot.src ? (
-                  <>
-                    <Image
-                      src={slot.src}
-                      alt={slot.alt || "Hero image"}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      unoptimized={slot.src.startsWith("http") && !slot.src.includes("supabase")}
-                    />
-                    <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
-                      <div className="bg-white/90 rounded-xl px-3 py-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-                        <Upload size={14} />
-                        Replace image
+              <div className="p-4 space-y-3">
+                {/* Preview / upload area */}
+                <div
+                  className="relative w-full rounded-xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 cursor-pointer hover:border-brand-purple/50 hover:bg-brand-light-purple/10 transition-all"
+                  style={{ aspectRatio: "4/3" }}
+                  onClick={() => fileRefs[i].current?.click()}
+                >
+                  {slot.src ? (
+                    <>
+                      <Image
+                        src={slot.src}
+                        alt={slot.alt || "Home page image"}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        unoptimized={slot.src.startsWith("http") && !slot.src.includes("supabase")}
+                      />
+                      <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
+                        <div className="bg-white/90 rounded-xl px-3 py-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+                          <Upload size={14} />
+                          Replace image
+                        </div>
                       </div>
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-400">
+                      {uploading === i ? (
+                        <p className="text-sm">Uploading…</p>
+                      ) : (
+                        <>
+                          <ImageIcon size={28} className="text-gray-300" />
+                          <p className="text-sm font-medium">Click to upload</p>
+                          <p className="text-xs">JPG, PNG, WebP up to 10 MB</p>
+                        </>
+                      )}
                     </div>
-                  </>
-                ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-400">
-                    {uploading === i ? (
-                      <p className="text-sm">Uploading…</p>
-                    ) : (
-                      <>
-                        <ImageIcon size={28} className="text-gray-300" />
-                        <p className="text-sm font-medium">Click to upload</p>
-                        <p className="text-xs">JPG, PNG, WebP up to 10 MB</p>
-                      </>
-                    )}
-                  </div>
-                )}
-                {uploading === i && (
-                  <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                    <p className="text-sm text-gray-500">Uploading…</p>
-                  </div>
-                )}
-              </div>
+                  )}
+                  {uploading === i && (
+                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                      <p className="text-sm text-gray-500">Uploading…</p>
+                    </div>
+                  )}
+                </div>
 
-              <input
-                ref={fileRefs[i]}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={e => {
-                  const f = e.target.files?.[0];
-                  if (f) handleUpload(i, f);
-                  e.target.value = "";
-                }}
-              />
+                <input
+                  ref={fileRefs[i]}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => {
+                    const f = e.target.files?.[0];
+                    if (f) handleUpload(i, f);
+                    e.target.value = "";
+                  }}
+                />
 
-              {/* URL input */}
-              <input
-                type="url"
-                placeholder="Or paste an image URL…"
-                value={slot.src}
-                onChange={e => update(i, { src: e.target.value, id: null })}
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple transition-all bg-white"
-              />
+                {/* URL input */}
+                <input
+                  type="url"
+                  placeholder="Or paste an image URL…"
+                  value={slot.src}
+                  onChange={e => update(i, { src: e.target.value, id: null })}
+                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple transition-all bg-white"
+                />
 
-              {/* Alt text */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                  Alt text <span className="text-gray-300 normal-case font-normal">(describes the image)</span>
-                </label>
+                {/* Alt text */}
                 <input
                   type="text"
-                  placeholder="e.g. Maphoshy Lifestyle — custom garment"
+                  placeholder="Alt text, e.g. Maphoshy Lifestyle — event styling"
                   value={slot.alt}
                   onChange={e => update(i, { alt: e.target.value })}
                   className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple transition-all bg-white"
                 />
               </div>
-
-              {/* Label */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                  Card label <span className="text-gray-300 normal-case font-normal">(optional overlay text)</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Styling, Corporate, Events…"
-                  value={slot.label}
-                  onChange={e => update(i, { label: e.target.value })}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple transition-all bg-white"
-                />
-              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Save footer */}
       <div className="flex justify-end pt-2">
         <button
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || loading}
           className="px-6 py-3 bg-brand-purple text-white text-sm font-semibold rounded-xl hover:bg-brand-purple/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
           {saving ? "Saving…" : "Save Changes"}

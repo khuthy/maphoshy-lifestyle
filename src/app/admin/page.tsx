@@ -4,7 +4,7 @@ import { AdminTour } from "@/components/admin/AdminTour";
 import {
   Images, Settings, Tag, HelpCircle, ArrowUpRight,
   CalendarCheck, TrendingUp, Clock, CheckCircle, CreditCard,
-  Mail, Phone, Calendar, Star, Video,
+  Mail, Phone, Calendar, Star, Video, Home,
 } from "lucide-react";
 import { createServerClient } from "@/lib/supabase";
 import { formatRand, getServiceLabel, formatPhone } from "@/lib/utils";
@@ -61,6 +61,7 @@ const STATUS = {
 
 const SECTIONS = [
   { href: "/admin/bookings",     icon: CalendarCheck, title: "Bookings",     description: "View all bookings, revenue and reply to clients.",              color: "bg-brand-light-purple text-brand-purple", tourTarget: "tour-bookings-card"     },
+  { href: "/admin/hero",         icon: Home,          title: "Home Images",  description: "Change the 4 photos shown in the mosaic on your home page.",     color: "bg-rose-50 text-rose-600",                tourTarget: undefined                },
   { href: "/admin/portfolio",    icon: Images,        title: "Portfolio",    description: "Upload, organise and toggle visibility of portfolio images.",     color: "bg-violet-50 text-violet-600",            tourTarget: "tour-portfolio-card"    },
   { href: "/admin/testimonials", icon: Star,          title: "Testimonials", description: "Add, edit and manage client reviews shown on the home page.",    color: "bg-amber-50 text-amber-600",              tourTarget: "tour-testimonials-card" },
   { href: "/admin/videos",       icon: Video,         title: "Videos",       description: "Add TikTok Get Ready With Me clips to the portfolio page.",      color: "bg-pink-50 text-pink-600",                tourTarget: undefined                },

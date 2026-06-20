@@ -6,8 +6,6 @@ import { Upload, ImageIcon, CheckCircle, AlertCircle, Info } from "lucide-react"
 
 interface Slot { id?: string | null; src: string; alt: string; label: string }
 
-const EMPTY_SLOT: Slot = { src: "", alt: "", label: "" };
-
 type Tab = "hero" | "about" | "portfolio_preview";
 
 const TABS: { id: Tab; label: string; description: string }[] = [
@@ -15,8 +13,6 @@ const TABS: { id: Tab; label: string; description: string }[] = [
   { id: "about",             label: "About Section",     description: "3 images in the grid next to the 'Style is a form of self-expression' text." },
   { id: "portfolio_preview", label: "Portfolio Section", description: "5 images in the asymmetric 'The Work Speaks' grid on the home page." },
 ];
-
-const SLOT_COUNT: Record<Tab, number> = { hero: 4, about: 3, portfolio_preview: 5 };
 
 const HERO_SLOT_HINTS = [
   "Large left card — most prominent",
@@ -86,7 +82,12 @@ export default function HomeImagesPage() {
   const [status, setStatus]         = useState<"idle" | "saved" | "error">("idle");
   const [uploading, setUploading]   = useState<number | null>(null);
 
-  const fileRefs = Array.from({ length: 5 }, () => useRef<HTMLInputElement>(null));
+  const ref0 = useRef<HTMLInputElement>(null);
+  const ref1 = useRef<HTMLInputElement>(null);
+  const ref2 = useRef<HTMLInputElement>(null);
+  const ref3 = useRef<HTMLInputElement>(null);
+  const ref4 = useRef<HTMLInputElement>(null);
+  const fileRefs = [ref0, ref1, ref2, ref3, ref4];
 
   useEffect(() => {
     if (loadedTabs.has(activeTab)) return;

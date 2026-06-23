@@ -4,7 +4,7 @@ import { AdminTour } from "@/components/admin/AdminTour";
 import {
   Images, Settings, Tag, HelpCircle, ArrowUpRight,
   CalendarCheck, TrendingUp, Clock, CheckCircle, CreditCard,
-  Mail, Phone, Calendar, Star, Video, Home,
+  Mail, Phone, Calendar, Star, Video, Home, BarChart2,
 } from "lucide-react";
 import { createServerClient } from "@/lib/supabase";
 import { formatRand, getServiceLabel, formatPhone } from "@/lib/utils";
@@ -68,6 +68,7 @@ const SECTIONS = [
   { href: "/admin/services",     icon: Settings,      title: "Services",     description: "Edit service titles, descriptions and inclusions.",              color: "bg-blue-50 text-blue-600",                tourTarget: "tour-services-card"     },
   { href: "/admin/pricing",      icon: Tag,           title: "Pricing",      description: "Manage prices and highlight the most popular entry.",            color: "bg-sky-50 text-sky-600",                  tourTarget: undefined                },
   { href: "/admin/faqs",         icon: HelpCircle,    title: "FAQs",         description: "Add, edit and reorder frequently asked questions.",              color: "bg-emerald-50 text-emerald-600",           tourTarget: "tour-faqs-card"         },
+  { href: "https://vercel.com/khuthys-projects/maphoshy-lifestyle/analytics", icon: BarChart2, title: "Site Analytics", description: "See how many people are visiting your website, which pages they view, and where they come from.", color: "bg-teal-50 text-teal-600", tourTarget: undefined },
 ];
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -129,6 +130,7 @@ export default async function AdminDashboard() {
               key={href}
               href={href}
               {...(tourTarget ? { "data-tour": tourTarget } : {})}
+              {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
               className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-purple/30 transition-all group"
             >
               <div className="flex items-start justify-between mb-4">

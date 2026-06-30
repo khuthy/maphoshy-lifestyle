@@ -27,15 +27,21 @@ export interface PayFastPaymentData {
 }
 
 /**
- * Builds the signature string from an ordered data object (no sorting).
- * PayFast expects params in the same order they appear in the URL.
+ * Builds the signature string from an ordered data object.
+ * @param filterEmpty  true when building outgoing payment URLs (omit blank params);
+ *                     false when validating incoming ITN (keep all params PayFast sent).
  */
 export function generatePayFastSignature(
   data: Record<string, string>,
-  passphrase: string
+  passphrase: string,
+  filterEmpty = true
 ): string {
-  const paramString = Object.entries(data)
-    .filter(([, v]) => v !== "" && v !== undefined && v !== null)
+  const entries = Object.entries(data);
+  const filtered = filterEmpty
+    ? entries.filter(([, v]) => v !== "" && v !== undefined && v !== null)
+    : entries.filter(([, v]) => v !== undefined && v !== null);
+
+  const paramString = filtered
     .map(([k, v]) => `${k}=${encodeURIComponent(v).replace(/%20/g, "+")}`)
     .join("&");
 
@@ -98,9 +104,11 @@ export function validatePayFastSignature(
   const dataWithoutSignature = { ...itnData };
   delete dataWithoutSignature.signature;
 
+  // Pass filterEmpty=false so empty params sent by PayFast are kept in the hash
   const expectedSignature = generatePayFastSignature(
     dataWithoutSignature,
-    PAYFAST_PASSPHRASE
+    PAYFAST_PASSPHRASE,
+    false
   );
 
   return receivedSignature === expectedSignature;
